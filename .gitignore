@@ -8,9 +8,17 @@
 /logs
 /profiles
 
+*/pretrained/
+cvataa/pretrained/
+cvataa/cellvit/pretrained/
+
+*.cache*
+*.cache/
+
 # Ignore temporary files
 docker-compose.override.yml
 __pycache__
+*.code-workspace
 *.pyc
 ._*
 .coverage

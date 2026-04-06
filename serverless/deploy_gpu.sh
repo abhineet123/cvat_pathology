@@ -6,11 +6,17 @@ set -eu
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FUNCTIONS_DIR=${1:-$SCRIPT_DIR}
 
+if [ "$#" -eq 2 ]; then
+	YAML_FNAME="function-$2-gpu.yaml"
+else
+	YAML_FNAME="function-gpu.yaml"
+fi
+
 nuctl create project cvat --platform local
 
 shopt -s globstar
 
-for func_config in "$FUNCTIONS_DIR"/**/function-gpu.yaml
+for func_config in "$FUNCTIONS_DIR"/**/"$YAML_FNAME"
 do
     func_root="$(dirname "$func_config")"
     func_rel_path="$(realpath --relative-to="$SCRIPT_DIR" "$(dirname "$func_root")")"

@@ -1,0 +1,99 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-instanSeg-semantic
+  namespace: cvat
+  annotations:
+    name: InstanSeg-Semantic
+    version: 2
+    type: interactor
+    spec:
+    min_pos_points: 0
+    min_neg_points: 0
+    startswith_box_optional: true
+    help_message: The interactor allows to get a binary semantic segmentation mask showing all the nuclei in the image
+
+spec:
+  description: Cell Semantic Segmentation with InstanSeg
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/instanseg_semantic
+
+  build:
+    image: cvat.pth.instanseg_semantic:latest-gpu
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+      # set NVIDIA container runtime settings
+        - kind: ENV
+          value: NVIDIA_VISIBLE_DEVICES=all
+        - kind: ENV
+          value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/instanseg
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install wget curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # get cuda
+      #   - kind: RUN
+      #     value: wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+      #   - kind: RUN
+      #     value: wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda-repo-ubuntu2204-12-2-local_12.2.2-535.104.05-1_amd64.deb
+      # # install cuda
+      #   - kind: RUN
+      #     value: mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+      #   - kind: RUN
+      #     value: dpkg -i cuda-repo-ubuntu2204-12-2-local_12.2.2-535.104.05-1_amd64.deb
+      #   - kind: RUN
+      #     value: cp /var/cuda-repo-ubuntu2204-12-2-local/cuda-*-keyring.gpg /usr/share/keyrings/
+      #   - kind: RUN
+      #     value: apt-get update && apt-get install -y --no-install-recommends cuda-12-2
+      #  # install cudnn
+      #   - kind: RUN
+      #     value: wget https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-8.9.7.29_cuda12-archive.tar.xz
+      #   - kind: RUN
+      #     value: tar xvf cudnn-linux-x86_64-8.9.7.29_cuda12-archive.tar.xz
+      #   - kind: RUN
+      #     value: mv cudnn-linux-x86_64-8.9.7.29_cuda12-archive/lib/* /usr/local/cuda-12.2/targets/x86_64-linux/lib/
+      #   - kind: RUN
+      #     value: mv cudnn-linux-x86_64-8.9.7.29_cuda12-archive/include/* /usr/local/cuda-12.2/targets/x86_64-linux/include/
+      # # set up cuda env
+      #   - kind: ENV
+      #     value: PATH=/usr/local/cuda-12.2/bin:${PATH}
+      #   - kind: ENV
+      #     value: CUDA_HOME=/usr/local/cuda-12.2
+      # set up debugging
+        # - kind: RUN
+        #   value: pip3 install debugpy
+      # clone custom instanseg
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/instanseg
+      # install instanseg
+        - kind: RUN
+          value: cd instanseg && pip3 install -e .
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

@@ -1,0 +1,16 @@
+#!/bin/bash
+git.exe pull origin master
+git.exe add --all .
+if [ "$#" -ne 1 ]; then
+   git.exe commit
+else
+	if [ "$1" == "f" ]; then
+		git.exe commit -m "minor fix"
+	elif [ "$1" == "r" ]; then
+		git.exe commit -m "Updated README"
+	else
+		git.exe commit -m "$1"
+	fi
+fi
+git.exe push origin master
+

@@ -1,0 +1,91 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-cellvit-virchow
+  namespace: cvat
+  annotations:
+    name: CellVIT-Virchow
+    version: 2
+    type: detector
+    spec: |
+      [
+        { "id": 1, "name": "nucleus", "type": "mask" }
+      ]
+
+spec:
+  description: Cell Segmentation with CellVIT-Virchow
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/cellvit
+
+  build:
+    image: cvat.pth.cellvit-virchow:latest-gpu
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+      # set NVIDIA container runtime settings
+        - kind: ENV
+          value: NVIDIA_VISIBLE_DEVICES=all
+        - kind: ENV
+          value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/cellvit
+      # set cellvit variant
+        - kind: ENV
+          value: CELLVIT_VARIANT=virchow
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install unzip wget curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # clone custom cellvit
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/cellvit_pp
+      # install cellvit
+        - kind: RUN
+          value: cd cellvit_pp && pip3 install -r requirements.txt
+        - kind: RUN
+          value: pip3 install cupy-cuda12x
+        - kind: RUN
+          value: pip3 install --upgrade timm wandb Numba scipy tensorflow scikit-image pandas torch torchvision torchaudio
+        - kind: RUN
+          value: pip3 uninstall -y opencv-python-headless
+        - kind: RUN
+          value: pip3 install --upgrade opencv-python
+      # setup cellvit-sam pretrained model
+        - kind: RUN
+          value: cd cellvit_pp && mkdir pretrained
+        - kind: RUN
+          value: cd cellvit_pp/pretrained && wget https://huggingface.co/abhineet123/cellvit/resolve/main/pretrained/Virchow.zip
+        - kind: RUN
+          value: cd cellvit_pp/pretrained && unzip Virchow.zip
+        - kind: RUN
+          value: cd cellvit_pp/pretrained && rm Virchow.zip
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/cellvit/cellvit_pp
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      port: 12345
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

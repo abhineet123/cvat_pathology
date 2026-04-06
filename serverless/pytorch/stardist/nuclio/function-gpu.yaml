@@ -1,0 +1,67 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-stardist
+  namespace: cvat
+  annotations:
+    name: stardist
+    version: 2
+    type: detector
+    spec: |
+      [
+        { "id": 1, "name": "nucleus", "type": "mask" }
+      ]
+
+spec:
+  description: Cell Segmentation with stardist-SAM
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/stardist
+
+  build:
+    image: cvat.pth.stardist:latest-gpu
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+      # set NVIDIA container runtime settings
+        - kind: ENV
+          value: NVIDIA_VISIBLE_DEVICES=all
+        - kind: ENV
+          value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/stardist
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install unzip wget curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # install stardist
+        - kind: RUN
+          value: pip3 install tensorflow
+        - kind: RUN
+          value: pip3 install stardist
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      port: 12345
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

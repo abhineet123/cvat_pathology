@@ -1,0 +1,441 @@
+(cvat) abhineet@x99:~/cvat_pathology$ pip install cellvit
+Collecting cellvit
+  Downloading cellvit-1.0.9-py3-none-any.whl.metadata (7.9 kB)
+Collecting colorama (from cellvit)
+  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting colour (from cellvit)
+  Downloading colour-0.1.5-py2.py3-none-any.whl.metadata (18 kB)
+Requirement already satisfied: einops>=0.6.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (0.8.2)
+Requirement already satisfied: geojson>=2.0.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (3.2.0)
+Requirement already satisfied: natsort in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (8.4.0)
+Requirement already satisfied: numba>=0.58.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (0.64.0)
+Collecting numpy<2.0.0 (from cellvit)
+  Using cached numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+Collecting opencv-python-headless==4.7.0.72 (from cellvit)
+  Downloading opencv_python_headless-4.7.0.72-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+Requirement already satisfied: opt-einsum>=3.3.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (3.4.0)
+Requirement already satisfied: pandas in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (2.3.3)
+Collecting pathopatch>=1.0.9 (from cellvit)
+  Downloading pathopatch-1.0.10-py3-none-any.whl.metadata (18 kB)
+Collecting pydantic<2.0,>=1.10.16 (from cellvit)
+  Downloading pydantic-1.10.26-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (155 kB)
+Collecting pydicom==2.4.4 (from cellvit)
+  Downloading pydicom-2.4.4-py3-none-any.whl.metadata (7.8 kB)
+Collecting ray>=2.9.3 (from ray[default]>=2.9.3->cellvit)
+  Downloading ray-2.54.0-cp310-cp310-manylinux2014_x86_64.whl.metadata (21 kB)
+Requirement already satisfied: scikit-image<0.27,>=0.19.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (0.25.2)
+Requirement already satisfied: scipy>=1.8.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (1.15.3)
+Collecting Shapely<=2.0.5,>=1.8.5.post1 (from cellvit)
+  Downloading shapely-2.0.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.0 kB)
+Collecting ujson==5.8.0 (from cellvit)
+  Downloading ujson-5.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.7 kB)
+Collecting python-snappy (from cellvit)
+  Downloading python_snappy-0.7.3-py3-none-any.whl.metadata (1.3 kB)
+Requirement already satisfied: tqdm in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (4.67.3)
+Requirement already satisfied: psutil in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cellvit) (7.2.2)
+Collecting pyaml (from cellvit)
+  Downloading pyaml-26.2.1-py3-none-any.whl.metadata (12 kB)
+Requirement already satisfied: typing-extensions>=4.2.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pydantic<2.0,>=1.10.16->cellvit) (4.15.0)
+Requirement already satisfied: networkx>=3.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (3.4.2)
+Requirement already satisfied: pillow>=10.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (12.1.1)
+Requirement already satisfied: imageio!=2.35.0,>=2.33 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (2.37.2)
+Requirement already satisfied: tifffile>=2022.8.12 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (2024.12.12
+)
+Requirement already satisfied: packaging>=21 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (26.0)
+Requirement already satisfied: lazy-loader>=0.4 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit) (0.4)
+Requirement already satisfied: llvmlite<0.47,>=0.46.0dev0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from numba>=0.58.0->cellvit) (0.46.0)
+Requirement already satisfied: PyYAML in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (6.0.3)
+Requirement already satisfied: future in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (1.0.0)
+Requirement already satisfied: matplotlib in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (3.10.8)
+Collecting openslide_python (from pathopatch>=1.0.9->cellvit)
+  Downloading openslide_python-1.4.3-cp310-cp310-manylinux1_x86_64.manylinux_2_5_x86_64.whl.metadata (5.0 kB)
+Requirement already satisfied: rasterio in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (1.4.4)
+Requirement already satisfied: requests in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (2.32.5)
+Collecting setuptools<=65.6.3 (from pathopatch>=1.0.9->cellvit)
+  Downloading setuptools-65.6.3-py3-none-any.whl.metadata (6.1 kB)
+Requirement already satisfied: torchvision in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (0.25.0)
+Requirement already satisfied: torch in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit) (2.10.0)
+Collecting wsidicom (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicom-0.29.0-py3-none-any.whl.metadata (24 kB)
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.24.0-py3-none-any.whl.metadata (15 kB)
+Requirement already satisfied: click>=7.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit) (8.3.1)
+Requirement already satisfied: filelock in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit) (3.24.3)
+Requirement already satisfied: jsonschema in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit) (4.26.0)
+Requirement already satisfied: msgpack<2.0.0,>=1.0.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit) (1.1
+.2)
+Requirement already satisfied: protobuf>=3.20.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit) (7.34.0)
+Collecting aiohttp>=3.13.3 (from ray[default]>=2.9.3->cellvit)
+  Downloading aiohttp-3.13.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+Collecting aiohttp_cors (from ray[default]>=2.9.3->cellvit)
+  Downloading aiohttp_cors-0.8.1-py3-none-any.whl.metadata (20 kB)
+Collecting colorful (from ray[default]>=2.9.3->cellvit)
+  Downloading colorful-0.5.8-py2.py3-none-any.whl.metadata (17 kB)
+Collecting py-spy>=0.2.0 (from ray[default]>=2.9.3->cellvit)
+  Downloading py_spy-0.4.1-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.whl.metadata (510 bytes)
+Requirement already satisfied: grpcio>=1.42.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit) (1.78.1)
+Collecting opencensus (from ray[default]>=2.9.3->cellvit)
+  Downloading opencensus-0.11.4-py2.py3-none-any.whl.metadata (12 kB)
+Collecting opentelemetry-sdk>=1.30.0 (from ray[default]>=2.9.3->cellvit)
+  Downloading opentelemetry_sdk-1.40.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting opentelemetry-exporter-prometheus (from ray[default]>=2.9.3->cellvit)
+  Downloading opentelemetry_exporter_prometheus-0.61b0-py3-none-any.whl.metadata (2.1 kB)
+Collecting opentelemetry-proto (from ray[default]>=2.9.3->cellvit)
+  Downloading opentelemetry_proto-1.40.0-py3-none-any.whl.metadata (2.4 kB)
+Requirement already satisfied: prometheus_client>=0.7.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit) (0.24.1)
+Collecting smart_open (from ray[default]>=2.9.3->cellvit)
+  Downloading smart_open-7.5.1-py3-none-any.whl.metadata (24 kB)
+Collecting virtualenv!=20.21.1,>=20.0.24 (from ray[default]>=2.9.3->cellvit)
+  Downloading virtualenv-21.2.0-py3-none-any.whl.metadata (3.5 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting async-timeout<6.0,>=4.0 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+Requirement already satisfied: attrs>=17.3.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit) (25.4.0
+)
+Collecting frozenlist>=1.1.1 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading frozenlist-1.8.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<7.0,>=4.5 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading multidict-6.7.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+Collecting propcache>=0.2.0 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading propcache-0.4.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (13 kB)
+Collecting yarl<2.0,>=1.17.0 (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit)
+  Downloading yarl-1.23.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+Requirement already satisfied: idna>=2.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from yarl<2.0,>=1.17.0->aiohttp>=3.13.3->ray[default]>=2.9.3->c
+ellvit) (3.11)
+Collecting opentelemetry-api==1.40.0 (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit)
+  Downloading opentelemetry_api-1.40.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting opentelemetry-semantic-conventions==0.61b0 (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit)
+  Downloading opentelemetry_semantic_conventions-0.61b0-py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: importlib-metadata<8.8.0,>=6.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from opentelemetry-api==1.40.0->openteleme
+try-sdk>=1.30.0->ray[default]>=2.9.3->cellvit) (8.7.1)
+Requirement already satisfied: zipp>=3.20 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api==1.40.0
+->opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit) (3.23.0)
+Collecting distlib<1,>=0.3.7 (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3->cellvit)
+  Using cached distlib-0.4.0-py2.py3-none-any.whl.metadata (5.2 kB)
+Requirement already satisfied: platformdirs<5,>=3.9.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=
+2.9.3->cellvit) (4.9.2)
+Collecting python-discovery>=1 (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3->cellvit)
+  Downloading python_discovery-1.1.3-py3-none-any.whl.metadata (5.4 kB)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[def
+ault]>=2.9.3->cellvit) (2025.9.1)
+Requirement already satisfied: referencing>=0.28.4 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3->cel
+lvit) (0.37.0)
+Requirement already satisfied: rpds-py>=0.25.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3->cellvit
+) (0.30.0)
+Requirement already satisfied: contourpy>=1.0.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (1.3.2)
+Requirement already satisfied: cycler>=0.10 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (4.61.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (1.4.9)
+Requirement already satisfied: pyparsing>=3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit) (2.9.0.
+post0)
+Requirement already satisfied: six>=1.5 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from python-dateutil>=2.7->matplotlib->pathopatch>=1.0.9->cellvi
+t) (1.17.0)
+Collecting opencensus-context>=0.1.3 (from opencensus->ray[default]>=2.9.3->cellvit)
+  Downloading opencensus_context-0.1.3-py2.py3-none-any.whl.metadata (3.3 kB)
+Collecting google-api-core<3.0.0,>=1.0.0 (from opencensus->ray[default]>=2.9.3->cellvit)
+  Downloading google_api_core-2.30.0-py3-none-any.whl.metadata (3.1 kB)
+Collecting googleapis-common-protos<2.0.0,>=1.56.3 (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit)
+  Downloading googleapis_common_protos-1.73.0-py3-none-any.whl.metadata (9.4 kB)
+Collecting protobuf>=3.20.3 (from ray>=2.9.3->ray[default]>=2.9.3->cellvit)
+  Using cached protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+Collecting proto-plus<2.0.0,>=1.22.3 (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit)
+  Downloading proto_plus-1.27.1-py3-none-any.whl.metadata (2.2 kB)
+Requirement already satisfied: google-auth<3.0.0,>=2.14.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus
+->ray[default]>=2.9.3->cellvit) (2.48.0)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.
+0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit) (0.4.2)
+Requirement already satisfied: cryptography>=38.0.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0
+.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit) (46.0.5)
+Requirement already satisfied: rsa<5,>=3.1.4 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.
+0.0->opencensus->ray[default]>=2.9.3->cellvit) (4.9.1)
+Requirement already satisfied: charset_normalizer<4,>=2 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit) (3.4.
+4)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit) (2.6.3)
+Requirement already satisfied: certifi>=2017.4.17 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit) (2026.2.25)
+Requirement already satisfied: pyasn1>=0.1.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from rsa<5,>=3.1.4->google-auth<3.0.0,>=2.14.1->google-api-
+core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit) (0.6.2)
+Requirement already satisfied: cffi>=2.0.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cryptography>=38.0.3->google-auth<3.0.0,>=2.14.1->google
+-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit) (2.0.0)
+Requirement already satisfied: pycparser in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=38.0.3->google-auth<3.0.0,>=2.1
+4.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit) (3.0)
+Requirement already satisfied: pytz>=2020.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pandas->cellvit) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from pandas->cellvit) (2025.3)
+Collecting cramjam (from python-snappy->cellvit)
+  Downloading cramjam-2.11.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.6 kB)
+Requirement already satisfied: affine in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit) (2.4.0)
+Requirement already satisfied: cligj>=0.5 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit) (0.7.2)
+Requirement already satisfied: click-plugins in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit) (1.1.1.2)
+Requirement already satisfied: wrapt in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from smart_open->ray[default]>=2.9.3->cellvit) (1.14.2)
+Requirement already satisfied: sympy>=1.13.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (1.14.0)
+Requirement already satisfied: jinja2 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (3.1.6)
+Requirement already satisfied: fsspec>=0.8.5 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (2026.2.0)
+Requirement already satisfied: cuda-bindings==12.9.4 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (12.9.4)
+Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.8.93 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (
+12.8.93)
+Requirement already satisfied: nvidia-cuda-runtime-cu12==12.8.90 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit)
+ (12.8.90)
+Requirement already satisfied: nvidia-cuda-cupti-cu12==12.8.90 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (
+12.8.90)
+Requirement already satisfied: nvidia-cudnn-cu12==9.10.2.21 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (9.1
+0.2.21)
+Requirement already satisfied: nvidia-cublas-cu12==12.8.4.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (12.
+8.4.1)
+Requirement already satisfied: nvidia-cufft-cu12==11.3.3.83 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (11.
+3.3.83)
+Requirement already satisfied: nvidia-curand-cu12==10.3.9.90 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (10
+.3.9.90)
+Requirement already satisfied: nvidia-cusolver-cu12==11.7.3.90 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (
+11.7.3.90)
+Requirement already satisfied: nvidia-cusparse-cu12==12.5.8.93 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (
+12.5.8.93)
+Requirement already satisfied: nvidia-cusparselt-cu12==0.7.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (0.
+7.1)
+Requirement already satisfied: nvidia-nccl-cu12==2.27.5 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (2.27.5)
+Requirement already satisfied: nvidia-nvshmem-cu12==3.4.5 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (3.4.5
+)
+Requirement already satisfied: nvidia-nvtx-cu12==12.8.90 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (12.8.9
+0)
+Requirement already satisfied: nvidia-nvjitlink-cu12==12.8.93 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (1
+2.8.93)
+Requirement already satisfied: nvidia-cufile-cu12==1.13.1.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (1.1
+3.1.3)
+Requirement already satisfied: triton==3.6.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit) (3.6.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from cuda-bindings==12.9.4->torch->pathopatch>=1.0.9
+->cellvit) (1.3.5)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from sympy>=1.13.3->torch->pathopatch>=1.0.9->cellvit)
+ (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from jinja2->torch->pathopatch>=1.0.9->cellvit) (3.0.3)
+Collecting dicomweb-client<0.60.0,>=0.59.2 (from wsidicom->pathopatch>=1.0.9->cellvit)
+  Downloading dicomweb_client-0.59.3-py3-none-any.whl.metadata (4.5 kB)
+Collecting marshmallow<4.0.0,>=3.20.1 (from wsidicom->pathopatch>=1.0.9->cellvit)
+  Downloading marshmallow-3.26.2-py3-none-any.whl.metadata (7.3 kB)
+INFO: pip is looking at multiple versions of wsidicom to determine which version is compatible with other requirements. This could take a while.
+Collecting wsidicom (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicom-0.28.1-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.28.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.27.1-py3-none-any.whl.metadata (25 kB)
+Collecting fsspec>=0.8.5 (from torch->pathopatch>=1.0.9->cellvit)
+  Downloading fsspec-2024.12.0-py3-none-any.whl.metadata (11 kB)
+Collecting wsidicom (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicom-0.27.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.26.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.25.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.24.0-py3-none-any.whl.metadata (25 kB)
+INFO: pip is still looking at multiple versions of wsidicom to determine which version is compatible with other requirements. This could take a while.
+  Downloading wsidicom-0.23.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.22.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.21.4-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.21.3-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.21.2-py3-none-any.whl.metadata (25 kB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. See https://pip.pypa.io/warnings/ba
+cktracking for guidance. If you want to abort this run, press Ctrl + C.
+  Downloading wsidicom-0.21.1-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.21.0-py3-none-any.whl.metadata (25 kB)
+  Downloading wsidicom-0.20.6-py3-none-any.whl.metadata (25 kB)
+Collecting universal-pathlib<0.3.0,>=0.2.1 (from wsidicom->pathopatch>=1.0.9->cellvit)
+  Downloading universal_pathlib-0.2.6-py3-none-any.whl.metadata (25 kB)
+Requirement already satisfied: retrying>=1.3.3 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from dicomweb-client<0.60.0,>=0.59.2->wsidicom->pathopatc
+h>=1.0.9->cellvit) (1.4.2)
+Collecting czifile<2020.0.0,>=2019.7.2 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading czifile-2019.7.2.2-py3-none-any.whl.metadata (5.6 kB)
+Collecting imagecodecs<2025.0.0,>=2024.12.30 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading imagecodecs-2024.12.30-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (19 kB)
+Collecting opentile<0.20.0,>=0.19.0 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.19.0-py3-none-any.whl.metadata (7.8 kB)
+INFO: pip is looking at multiple versions of wsidicomizer to determine which version is compatible with other requirements. This could take a while.
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.23.1-py3-none-any.whl.metadata (16 kB)
+  Downloading wsidicomizer-0.23.0-py3-none-any.whl.metadata (16 kB)
+  Downloading wsidicomizer-0.22.1-py3-none-any.whl.metadata (14 kB)
+Collecting opentile<0.19.0,>=0.18.0 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.18.0-py3-none-any.whl.metadata (7.8 kB)
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.22.0-py3-none-any.whl.metadata (14 kB)
+  Downloading wsidicomizer-0.21.1-py3-none-any.whl.metadata (14 kB)
+Collecting opentile<0.18.0,>=0.17.0 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.17.0-py3-none-any.whl.metadata (7.8 kB)
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.21.0-py3-none-any.whl.metadata (14 kB)
+  Downloading wsidicomizer-0.20.0-py3-none-any.whl.metadata (14 kB)
+Collecting opentile<0.17.0,>=0.16.0 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.16.0-py3-none-any.whl.metadata (7.8 kB)
+INFO: pip is still looking at multiple versions of wsidicomizer to determine which version is compatible with other requirements. This could take a while.
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.19.0-py3-none-any.whl.metadata (14 kB)
+Collecting opentile<0.16.0,>=0.15.1 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.15.1-py3-none-any.whl.metadata (7.8 kB)
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.18.0-py3-none-any.whl.metadata (14 kB)
+  Downloading wsidicomizer-0.17.0-py3-none-any.whl.metadata (11 kB)
+  Downloading wsidicomizer-0.16.0-py3-none-any.whl.metadata (11 kB)
+Collecting opentile<0.15.0,>=0.14.0 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.14.0-py3-none-any.whl.metadata (7.8 kB)
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.15.1-py3-none-any.whl.metadata (11 kB)
+Collecting opentile<0.14.0,>=0.13.1 (from wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading opentile-0.13.4-py3-none-any.whl.metadata (7.8 kB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. See https://pip.pypa.io/warnings/ba
+cktracking for guidance. If you want to abort this run, press Ctrl + C.
+Collecting wsidicomizer (from pathopatch>=1.0.9->cellvit)
+  Downloading wsidicomizer-0.15.0-py3-none-any.whl.metadata (11 kB)
+  Downloading wsidicomizer-0.14.2-py3-none-any.whl.metadata (11 kB)
+Requirement already satisfied: tiffslide<3.0.0,>=2.4.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9->cellvit) (2
+.5.1)
+Collecting pillow>=10.1 (from scikit-image<0.27,>=0.19.3->cellvit)
+  Downloading pillow-10.4.0-cp310-cp310-manylinux_2_28_x86_64.whl.metadata (9.2 kB)
+Collecting PyTurboJPEG<2.0.0,>=1.7.3 (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading pyturbojpeg-1.8.3.tar.gz (12 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: defusedxml<0.8.0,>=0.7.1 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pat
+hopatch>=1.0.9->cellvit) (0.7.1)
+Requirement already satisfied: imagecodecs>=2022.12.24 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->path
+opatch>=1.0.9->cellvit) (2025.3.30)
+Collecting ome-types<0.6.0,>=0.5.0 (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading ome_types-0.5.3-py3-none-any.whl.metadata (11 kB)
+Collecting pydantic-compat>=0.1.0 (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading pydantic_compat-0.1.2-py3-none-any.whl.metadata (8.4 kB)
+Collecting xsdata<24.4,>=23.6 (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit)
+  Downloading xsdata-24.3.1-py3-none-any.whl.metadata (6.3 kB)
+Requirement already satisfied: zarr<3.0,>=2.16.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>
+=1.0.9->cellvit) (2.18.3)
+Requirement already satisfied: asciitree in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->
+pathopatch>=1.0.9->cellvit) (0.3.3)
+Requirement already satisfied: numcodecs>=0.10.0 in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidic
+omizer->pathopatch>=1.0.9->cellvit) (0.13.1)
+Requirement already satisfied: fasteners in /home/abhineet/.virtualenvs/cvat/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->
+pathopatch>=1.0.9->cellvit) (0.20)
+Downloading cellvit-1.0.9-py3-none-any.whl (111 kB)
+Downloading opencv_python_headless-4.7.0.72-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (49.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 49.2/49.2 MB 92.5 MB/s  0:00:00
+Downloading pydicom-2.4.4-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 56.2 MB/s  0:00:00
+Downloading ujson-5.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (53 kB)
+Using cached numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+Downloading pydantic-1.10.26-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.9/2.9 MB 16.6 MB/s  0:00:00
+Downloading shapely-2.0.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 12.3 MB/s  0:00:00
+Downloading pathopatch-1.0.10-py3-none-any.whl (5.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.8/5.8 MB 12.9 MB/s  0:00:00
+Downloading setuptools-65.6.3-py3-none-any.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 13.2 MB/s  0:00:00
+Downloading ray-2.54.0-cp310-cp310-manylinux2014_x86_64.whl (72.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 72.8/72.8 MB 95.2 MB/s  0:00:00
+Downloading aiohttp-3.13.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 17.9 MB/s  0:00:00
+Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+Downloading multidict-6.7.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (243 kB)
+Downloading yarl-1.23.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (102 kB)
+Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading frozenlist-1.8.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (219 kB)
+Downloading opentelemetry_sdk-1.40.0-py3-none-any.whl (141 kB)
+Downloading opentelemetry_api-1.40.0-py3-none-any.whl (68 kB)
+Downloading opentelemetry_semantic_conventions-0.61b0-py3-none-any.whl (231 kB)
+Downloading propcache-0.4.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (196 kB)
+Downloading py_spy-0.4.1-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.whl (2.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.8/2.8 MB 88.7 MB/s  0:00:00
+Downloading virtualenv-21.2.0-py3-none-any.whl (5.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.8/5.8 MB 87.5 MB/s  0:00:00
+Using cached distlib-0.4.0-py2.py3-none-any.whl (469 kB)
+Downloading python_discovery-1.1.3-py3-none-any.whl (31 kB)
+Downloading aiohttp_cors-0.8.1-py3-none-any.whl (25 kB)
+Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Downloading colorful-0.5.8-py2.py3-none-any.whl (201 kB)
+Downloading colour-0.1.5-py2.py3-none-any.whl (23 kB)
+Downloading opencensus-0.11.4-py2.py3-none-any.whl (128 kB)
+Downloading google_api_core-2.30.0-py3-none-any.whl (173 kB)
+Downloading googleapis_common_protos-1.73.0-py3-none-any.whl (297 kB)
+Downloading proto_plus-1.27.1-py3-none-any.whl (50 kB)
+Using cached protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
+Downloading opencensus_context-0.1.3-py2.py3-none-any.whl (5.1 kB)
+Downloading openslide_python-1.4.3-cp310-cp310-manylinux1_x86_64.manylinux_2_5_x86_64.whl (40 kB)
+Downloading opentelemetry_exporter_prometheus-0.61b0-py3-none-any.whl (13 kB)
+Downloading opentelemetry_proto-1.40.0-py3-none-any.whl (72 kB)
+Downloading pyaml-26.2.1-py3-none-any.whl (27 kB)
+Downloading python_snappy-0.7.3-py3-none-any.whl (9.2 kB)
+Downloading cramjam-2.11.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 88.0 MB/s  0:00:00
+Downloading smart_open-7.5.1-py3-none-any.whl (64 kB)
+Downloading wsidicom-0.20.6-py3-none-any.whl (225 kB)
+Downloading dicomweb_client-0.59.3-py3-none-any.whl (61 kB)
+Downloading fsspec-2024.12.0-py3-none-any.whl (183 kB)
+Downloading marshmallow-3.26.2-py3-none-any.whl (50 kB)
+Downloading universal_pathlib-0.2.6-py3-none-any.whl (50 kB)
+Downloading wsidicomizer-0.14.2-py3-none-any.whl (57 kB)
+Downloading opentile-0.13.4-py3-none-any.whl (55 kB)
+Downloading ome_types-0.5.3-py3-none-any.whl (248 kB)
+Downloading pillow-10.4.0-cp310-cp310-manylinux_2_28_x86_64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 55.2 MB/s  0:00:00
+Downloading xsdata-24.3.1-py3-none-any.whl (224 kB)
+Downloading czifile-2019.7.2.2-py3-none-any.whl (18 kB)
+Downloading pydantic_compat-0.1.2-py3-none-any.whl (13 kB)
+Building wheels for collected packages: PyTurboJPEG
+  Building wheel for PyTurboJPEG (pyproject.toml) ... done
+  Created wheel for PyTurboJPEG: filename=pyturbojpeg-1.8.3-py3-none-any.whl size=13231 sha256=99786ca18eee272ab5c7df6e91b8f4065c32c94c4e6c951327f6cc6872b6143d
+  Stored in directory: /home/abhineet/.cache/pip/wheels/44/f3/5d/eb27a94b8da00e354d30e63ccf1a4187c4c1871b3136cb811d
+Successfully built PyTurboJPEG
+Installing collected packages: py-spy, opencensus-context, distlib, colour, colorful, xsdata, ujson, smart_open, setuptools, python-discovery, pydicom, pydantic, pyaml, p
+rotobuf, propcache, pillow, numpy, multidict, marshmallow, fsspec, frozenlist, cramjam, colorama, async-timeout, aiohappyeyeballs, yarl, virtualenv, universal-pathlib, Sh
+apely, PyTurboJPEG, python-snappy, pydantic-compat, proto-plus, opentelemetry-proto, opentelemetry-api, openslide_python, opencv-python-headless, googleapis-common-protos
+, dicomweb-client, aiosignal, wsidicom, opentelemetry-semantic-conventions, ome-types, czifile, aiohttp, ray, opentile, opentelemetry-sdk, google-api-core, aiohttp_cors,
+wsidicomizer, opentelemetry-exporter-prometheus, opencensus, pathopatch, cellvit
+  Attempting uninstall: xsdata
+    Found existing installation: xsdata 26.2
+    Uninstalling xsdata-26.2:
+      Successfully uninstalled xsdata-26.2
+  Attempting uninstall: setuptools
+    Found existing installation: setuptools 80.10.1
+    Uninstalling setuptools-80.10.1:
+      Successfully uninstalled setuptools-80.10.1
+  Attempting uninstall: pydantic
+    Found existing installation: pydantic 2.12.5
+    Uninstalling pydantic-2.12.5:
+      Successfully uninstalled pydantic-2.12.5
+  Attempting uninstall: protobuf
+    Found existing installation: protobuf 7.34.0
+    Uninstalling protobuf-7.34.0:
+      Successfully uninstalled protobuf-7.34.0
+  Attempting uninstall: pillow
+    Found existing installation: pillow 12.1.1
+    Uninstalling pillow-12.1.1:
+      Successfully uninstalled pillow-12.1.1
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.2.6
+    Uninstalling numpy-2.2.6:
+      Successfully uninstalled numpy-2.2.6
+  Attempting uninstall: fsspec
+    Found existing installation: fsspec 2026.2.0
+    Uninstalling fsspec-2026.2.0:
+      Successfully uninstalled fsspec-2026.2.0
+  Attempting uninstall: opencv-python-headless
+    Found existing installation: opencv-python-headless 4.13.0.92
+    Uninstalling opencv-python-headless-4.13.0.92:
+      Successfully uninstalled opencv-python-headless-4.13.0.92
+  Attempting uninstall: ome-types
+    Found existing installation: ome-types 0.6.3
+    Uninstalling ome-types-0.6.3:
+      Successfully uninstalled ome-types-0.6.3
+	  
+	  
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency confli
+cts.
+bioimageio-core 0.9.6 requires pydantic<3,>=2.7.0, but you have pydantic 1.10.26 which is incompatible.
+bioimageio-spec 0.5.7.4 requires pydantic<3,>=2.10.3, but you have pydantic 1.10.26 which is incompatible.
+opencv-python 4.13.0.92 requires numpy>=2; python_version >= "3.9", but you have numpy 1.26.4 which is incompatible.
+pydantic-extra-types 2.11.0 requires pydantic>=2.5.2, but you have pydantic 1.10.26 which is incompatible.
+pydantic-settings 2.13.1 requires pydantic>=2.7.0, but you have pydantic 1.10.26 which is incompatible.
+
+Successfully installed PyTurboJPEG-1.8.3 Shapely-2.0.5 aiohappyeyeballs-2.6.1 aiohttp-3.13.3 aiohttp_cors-0.8.1 aiosignal-1.4.0 async-timeout-5.0.1 cellvit-1.0.9 colorama
+-0.4.6 colorful-0.5.8 colour-0.1.5 cramjam-2.11.0 czifile-2019.7.2.2 dicomweb-client-0.59.3 distlib-0.4.0 frozenlist-1.8.0 fsspec-2024.12.0 google-api-core-2.30.0 googlea
+pis-common-protos-1.73.0 marshmallow-3.26.2 multidict-6.7.1 numpy-1.26.4 ome-types-0.5.3 opencensus-0.11.4 opencensus-context-0.1.3 opencv-python-headless-4.7.0.72 opensl
+ide_python-1.4.3 opentelemetry-api-1.40.0 opentelemetry-exporter-prometheus-0.61b0 opentelemetry-proto-1.40.0 opentelemetry-sdk-1.40.0 opentelemetry-semantic-conventions-
+0.61b0 opentile-0.13.4 pathopatch-1.0.10 pillow-10.4.0 propcache-0.4.1 proto-plus-1.27.1 protobuf-6.33.5 py-spy-0.4.1 pyaml-26.2.1 pydantic-1.10.26 pydantic-compat-0.1.2
+pydicom-2.4.4 python-discovery-1.1.3 python-snappy-0.7.3 ray-2.54.0 setuptools-65.6.3 smart_open-7.5.1 ujson-5.8.0 universal-pathlib-0.2.6 virtualenv-21.2.0 wsidicom-0.20
+.6 wsidicomizer-0.14.2 xsdata-24.3.1 yarl-1.23.0
