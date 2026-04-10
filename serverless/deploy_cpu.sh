@@ -14,7 +14,13 @@ nuctl create project cvat --platform local
 
 shopt -s globstar
 
-for func_config in "$FUNCTIONS_DIR"/**/function.yaml
+if [ "$#" -eq 2 ]; then
+	YAML_FNAME="$2.yaml"
+else
+	YAML_FNAME="function.yaml"
+fi
+
+for func_config in "$FUNCTIONS_DIR"/**/"$YAML_FNAME"
 do
     func_root="$(dirname "$func_config")"
     func_rel_path="$(realpath --relative-to="$SCRIPT_DIR" "$(dirname "$func_root")")"

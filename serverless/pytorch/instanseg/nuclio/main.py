@@ -6,7 +6,7 @@ import json
 import base64
 from PIL import Image
 import io
-from model_handler import ModelHandler
+from instanseg_model import ModelHandler
 
 # import debugpy
 # debugpy.listen(5678)

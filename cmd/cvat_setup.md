@@ -408,6 +408,7 @@ docker network inspect cvat_cvat
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-detectron2-retinanet-r101
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-sam-vit-h
 docker network disconnect -f cvat_cvat nuclio-nuclio-openvino-omz-public-mask-rcnn-inception-resnet-v2-atrous-coco
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-shiyinzhang-iog
 
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanSeg
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-stardist
@@ -435,6 +436,7 @@ nuctl delete function pth-cellpose --platform local --force
 nuctl delete function pth-cellvit-sam --platform local --force
 nuctl delete function pth-cellvit-hipt --platform local --force
 nuctl delete function pth-cellvit-virchow --platform local --force
+
 nuctl delete function pth-facebookresearch-detectron2-retinanet-r101 --platform local
 
 <a id="instanseg___functions_deploy_"></a>

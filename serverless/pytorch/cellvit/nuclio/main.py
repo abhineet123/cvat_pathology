@@ -14,19 +14,18 @@ import io
 
 
 def init_context(context):
-    dirs = os.listdir()
-    dirs_str = "\n".join(dirs)
+    # dirs = os.listdir()
+    # dirs_str = "\n".join(dirs)
     cwd = os.getcwd()
-
     sys.path.append(cwd)
 
-    context.logger.info(f"cwd: {cwd}")
-    context.logger.info(f"dirs:\n{dirs_str}")
+    # context.logger.info(f"cwd: {cwd}")
+    # context.logger.info(f"dirs:\n{dirs_str}")
 
     from cellvit_model import CellVITModel
 
     context.logger.info("Init context...  0%")
-    model = CellVITModel()
+    model = CellVITModel(context)
     context.user_data.model = model
 
     context.logger.info("Init context...100%")

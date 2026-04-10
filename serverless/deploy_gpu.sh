@@ -7,7 +7,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FUNCTIONS_DIR=${1:-$SCRIPT_DIR}
 
 if [ "$#" -eq 2 ]; then
-	YAML_FNAME="function-$2-gpu.yaml"
+	YAML_FNAME="$2-gpu.yaml"
 else
 	YAML_FNAME="function-gpu.yaml"
 fi
@@ -26,6 +26,7 @@ do
         --file "$func_config" --platform local \
         --env CVAT_FUNCTIONS_REDIS_HOST=cvat_redis_ondisk \
         --env CVAT_FUNCTIONS_REDIS_PORT=6666 \
+        --verbose \
         --platform-config '{"attributes": {"network": "cvat_cvat"}}'
 done
 

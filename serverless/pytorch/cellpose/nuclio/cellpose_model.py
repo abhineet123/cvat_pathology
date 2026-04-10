@@ -30,6 +30,7 @@ def to_cvat_mask(box: list, mask):
 
 class CellPoseModel:
     def __init__(self):
+        
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         pretrained_model = "cpsam"
         # pixel_size = 0.2632

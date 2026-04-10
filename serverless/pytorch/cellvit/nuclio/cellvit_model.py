@@ -1,6 +1,9 @@
 import numpy as np
 import os
 
+import urllib.request
+
+
 import torch
 from torchvision import transforms as T
 import torch.nn.functional as F
@@ -43,37 +46,41 @@ def linux_path(*args, **kwargs):
 
 
 class CellVITModel:
-    def __init__(self):
+    def __init__(self, context):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.resolution = 0.25
 
-        self.model_root = "pretrained"
-
+        self.model_url_root = "https://huggingface.co/abhineet123/cellvit_pp/resolve/main"
         try:
             model_type = os.environ["CELLVIT_VARIANT"]
         except KeyError:
             model_type = "sam"
 
         if model_type == "sam":
-            self.model_path = "SAM/CellViT-SAM-H-x40-AMP.pth"
+            self.ckpt = "CellViT-SAM-H-x40-AMP.pth"
         elif model_type == "hipt":
-            self.model_path = "HIPT-256/CellViT-256-x40-AMP.pth"
+            self.ckpt = "CellViT-256-x40-AMP.pth"
         elif model_type == "virchow":
-            self.model_path = "Virchow/CellViT-Virchow-x40-AMP.pth"
+            self.ckpt = "CellViT-Virchow-x40-AMP.pth"
         else:
             raise AssertionError(f"invalid model_type {model_type}")
 
-        self.model_path = linux_path(self.model_root, self.model_path)
-        assert os.path.exists(self.model_path), f"invalid model_path: {self.model_path}"
+        if not os.path.exists(self.ckpt):
+            self.model_url = f"{self.model_url_root}/{self.ckpt}"
+            context.logger.info(f"downloading ckpt: {self.model_url}")
 
-        print(f"Loading checkpoint: {self.model_path}")
+            urllib.request.urlretrieve(f"{self.model_url}", f"{self.ckpt}")
 
-        model_checkpoint = torch.load(self.model_path, map_location="cpu")
+        assert os.path.exists(self.ckpt), f"ckpt not found: {self.ckpt}"
+
+        context.logger.info(f"Loading checkpoint: {self.ckpt}")
+
+        model_checkpoint = torch.load(self.ckpt, map_location="cpu")
 
         self.model_type = model_checkpoint["arch"]
         self.run_conf = unflatten_dict(model_checkpoint["config"], ".")
 
-        print(f"creating model: {self.model_type}")
+        context.logger.info(f"creating model: {self.model_type}")
 
         if self.model_type in ["CellViT"]:
             self.model = CellViT(
