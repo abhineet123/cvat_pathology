@@ -30,12 +30,14 @@
     - [nuclio_wrapper       @ down/deploy](#nuclio_wrapper___down_deplo_y_)
   - [functions       @ deploy](#functions___deploy_)
     - [instanseg       @ functions/deploy](#instanseg___functions_deploy_)
+      - [debug       @ instanseg/functions/deploy](#debug___instanseg_functions_deploy_)
     - [stardist       @ functions/deploy](#stardist___functions_deploy_)
     - [cellpose       @ functions/deploy](#cellpose___functions_deploy_)
     - [cellvit       @ functions/deploy](#cellvit___functions_deploy_)
       - [sam       @ cellvit/functions/deploy](#sam___cellvit_functions_deploy_)
       - [hipt       @ cellvit/functions/deploy](#hipt___cellvit_functions_deploy_)
       - [virchow       @ cellvit/functions/deploy](#virchow___cellvit_functions_deploy_)
+    - [microsam       @ functions/deploy](#microsam___functions_deploy_)
     - [openvino       @ functions/deploy](#openvino___functions_deploy_)
     - [iog       @ functions/deploy](#iog___functions_deploy_)
     - [sam       @ functions/deploy](#sam___functions_deploy_)
@@ -238,7 +240,6 @@ sudo systemctl stop docker.socket
 mkdir /home/NVME-8TB/docker
 mkdir /data/docker
 
-
 sudo gedit /etc/docker/daemon.json
 sudo nano /etc/docker/daemon.json
 
@@ -437,12 +438,25 @@ nuctl delete function pth-cellvit-sam --platform local --force
 nuctl delete function pth-cellvit-hipt --platform local --force
 nuctl delete function pth-cellvit-virchow --platform local --force
 
+nuctl delete function pth-microsam --platform local --force
+
+nuctl delete function pth-facebookresearch-sam-vit-h --platform local --force
 nuctl delete function pth-facebookresearch-detectron2-retinanet-r101 --platform local
 
 <a id="instanseg___functions_deploy_"></a>
 ### instanseg       @ functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/instanseg instanseg
 docker logs nuclio-nuclio-pth-instanSeg -f
+<a id="debug___instanseg_functions_deploy_"></a>
+#### debug       @ instanseg/functions/deploy-->cvat_setup
+docker exec -it nuclio-nuclio-pth-instanSeg /bin/bash
+apt update && apt install -y ssh nano
+docker exec -it nuclio-nuclio-pth-instanSeg nvidia-smi
+ssh-keygen
+cat /root/.ssh/id_rsa.pub
+nano /root/.ssh/config
+
+ssh -R 5678:localhost:5678 x99
 
 <a id="stardist___functions_deploy_"></a>
 ### stardist       @ functions/deploy-->cvat_setup
@@ -470,6 +484,11 @@ docker logs nuclio-nuclio-pth-cellvit-hipt -f
 #### virchow       @ cellvit/functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/cellvit cellvit-virchow
 docker logs nuclio-nuclio-pth-cellvit-virchow -f
+
+<a id="microsam___functions_deploy_"></a>
+### microsam       @ functions/deploy-->cvat_setup
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam
+docker logs nuclio-nuclio-pth-microsam -f
 
 <a id="openvino___functions_deploy_"></a>
 ### openvino       @ functions/deploy-->cvat_setup
@@ -514,8 +533,6 @@ nuctl deploy --project-name cvat \
 
 <a id="debug___functions_deploy_"></a>
 ### debug       @ functions/deploy-->cvat_setup
-https://docs.cvat.ai/docs/guides/serverless-tutorial/#debugging-a-serverless-function
-
 docker logs cvat_server -f
 docker logs nuclio -f
 
@@ -523,6 +540,8 @@ docker logs nuclio-nuclio-pth-instanSeg -f
 docker logs nuclio-nuclio-pth-cellvit -f
 docker logs nuclio-nuclio-pth-cellpose -f
 docker logs nuclio-nuclio-pth-stardist -f
+
+docker logs nuclio-nuclio-pth-microsam -f
 
 `Error: Could not get models from the server`
 `ERROR django.request: Internal Server Error: /api/lambda/functions`
@@ -534,17 +553,17 @@ fix errors in nuclio functions.yaml files
 https://github.com/cvat-ai/cvat/issues/8451#issuecomment-2375267178
 doesn't seem to prevent cvat from running normally
 
-
 <a id="vscode___debug_functions_deploy_"></a>
 #### vscode       @ debug/functions/deploy-->cvat_setup
-docker exec -it nuclio-nuclio-pth-instanSeg /bin/bash
-apt update && apt install -y ssh nano
-docker exec -it nuclio-nuclio-pth-instanSeg nvidia-smi
-ssh-keygen
-cat /root/.ssh/id_rsa.pub
-nano /root/.ssh/config
+https://docs.cvat.ai/docs/guides/serverless-tutorial/#debugging-a-serverless-function
 
-ssh -R 5678:localhost:5678 x99
+docker exec -it nuclio-nuclio-pth-microsam /bin/bash
+cat /root/.ssh/id_rsa.pub
+
+ssh -R 5679:localhost:5679 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x99
+
+docker logs nuclio-nuclio-pth-microsam -f
+
 
 <a id="dat_a_"></a>
 # data

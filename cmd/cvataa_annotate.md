@@ -9,6 +9,7 @@
     - [cellpose       @ Cervix,HNSCC,NSCLC,UpperGI](#cellpose___cervix_hnscc_nsclc_uppergi_)
         - [A10       @ cellpose/Cervix,HNSCC,NSCLC,UpperGI](#a10___cellpose_cervix_hnscc_nsclc_upperg_i_)
         - [A11       @ cellpose/Cervix,HNSCC,NSCLC,UpperGI](#a11___cellpose_cervix_hnscc_nsclc_upperg_i_)
+        - [A12       @ cellpose/Cervix,HNSCC,NSCLC,UpperGI](#a12___cellpose_cervix_hnscc_nsclc_upperg_i_)
     - [instanseg       @ Cervix,HNSCC,NSCLC,UpperGI](#instanseg___cervix_hnscc_nsclc_uppergi__1)
         - [A10       @ instanseg/Cervix,HNSCC,NSCLC,UpperGI](#a10___instanseg_cervix_hnscc_nsclc_uppergi_)
         - [A11       @ instanseg/Cervix,HNSCC,NSCLC,UpperGI](#a11___instanseg_cervix_hnscc_nsclc_uppergi_)
@@ -97,6 +98,10 @@ python cvataa/annotate_tasks.py filter.iall=HNSCC,A11,512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=NSCLC,B11,512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=Cervix,C11,512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=UpperGI,E11,512 models=cellpose
+
+<a id="a12___cellpose_cervix_hnscc_nsclc_upperg_i_"></a>
+### A12       @ cellpose/Cervix,HNSCC,NSCLC,UpperGI-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=HNSCC,A11,512 models=cellpose
 
 <a id="instanseg___cervix_hnscc_nsclc_uppergi__1"></a>
 ## instanseg       @ Cervix,HNSCC,NSCLC,UpperGI-->cvataa_annotate

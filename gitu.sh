@@ -1,16 +1,16 @@
 #!/bin/bash
-git.exe pull origin master
-git.exe add --all .
+git.exe --git-dir=.gitb pull origin master
+git.exe --git-dir=.gitb add --all .
 if [ "$#" -ne 1 ]; then
-   git.exe commit
+   git.exe --git-dir=.gitb commit
 else
 	if [ "$1" == "f" ]; then
-		git.exe commit -m "minor fix"
+		git.exe --git-dir=.gitb commit -m "minor fix"
 	elif [ "$1" == "r" ]; then
-		git.exe commit -m "Updated README"
+		git.exe --git-dir=.gitb commit -m "Updated README"
 	else
-		git.exe commit -m "$1"
+		git.exe --git-dir=.gitb commit -m "$1"
 	fi
 fi
-git.exe push origin master
+git.exe --git-dir=.gitb push origin master
 
