@@ -27,7 +27,9 @@
     - [nuclio_wrapper       @ down/deploy](#nuclio_wrapper___down_deplo_y_)
   - [functions       @ deploy](#functions___deploy_)
     - [microsam       @ functions/deploy](#microsam___functions_deploy_)
-      - [variants       @ microsam/functions/deploy](#variants___microsam_functions_deplo_y_)
+      - [hp       @ microsam/functions/deploy](#hp___microsam_functions_deplo_y_)
+      - [lm       @ microsam/functions/deploy](#lm___microsam_functions_deplo_y_)
+      - [mi       @ microsam/functions/deploy](#mi___microsam_functions_deplo_y_)
       - [dbg       @ microsam/functions/deploy](#dbg___microsam_functions_deplo_y_)
     - [instanseg       @ functions/deploy](#instanseg___functions_deploy_)
       - [debug       @ instanseg/functions/deploy](#debug___instanseg_functions_deploy_)
@@ -356,24 +358,29 @@ apt update && apt install ssh nano
 nano /root/.ssh/config
 ssh -R 5679:localhost:5679 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x99
 
-<a id="variants___microsam_functions_deplo_y_"></a>
-#### variants       @ microsam/functions/deploy-->cvat_setup
+<a id="hp___microsam_functions_deplo_y_"></a>
+#### hp       @ microsam/functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_huge
 docker logs nuclio-nuclio-pth-microsam_hp_huge -f
 nuctl delete function pth-microsam_hp_huge --platform local --force
 
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_base
+docker logs nuclio-nuclio-pth-microsam_hp_base -f
+nuctl delete function pth-microsam_hp_base --platform local --force
+
+<a id="lm___microsam_functions_deplo_y_"></a>
+#### lm       @ microsam/functions/deploy-->cvat_setup
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_lm_large
+docker logs nuclio-nuclio-pth-microsam_lm_large -f
+nuctl delete function pth-microsam_lm_large --platform local --force
+
+<a id="mi___microsam_functions_deplo_y_"></a>
+#### mi       @ microsam/functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_mi_base
 docker logs nuclio-nuclio-pth-microsam_mi_base -f
 nuctl delete function pth-microsam_mi_base --platform local --force
 
 
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_lm_large
-docker logs nuclio-nuclio-pth-microsam_lm_large -f
-nuctl delete function pth-microsam_lm_large --platform local --force
-
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_base
-docker logs nuclio-nuclio-pth-microsam_hp_base -f
-nuctl delete function pth-microsam_hp_base --platform local --force
 
 <a id="dbg___microsam_functions_deplo_y_"></a>
 #### dbg       @ microsam/functions/deploy-->cvat_setup
