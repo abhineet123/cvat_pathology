@@ -20,15 +20,15 @@
   - [gbt       @ deploy](#gbt___deploy_)
     - [volumes       @ gbt/deploy](#volumes___gbt_deploy_)
       - [cvat_volumes       @ volumes/gbt/deploy](#cvat_volumes___volumes_gbt_deploy_)
-  - [docker       @ deploy](#docker___deploy_)
-    - [containerd       @ docker/deploy](#containerd___docker_deplo_y_)
-    - [prune       @ docker/deploy](#prune___docker_deplo_y_)
-    - [cli       @ docker/deploy](#cli___docker_deplo_y_)
-    - [https       @ docker/deploy](#https___docker_deplo_y_)
-      - [issues       @ https/docker/deploy](#issues___https_docker_deplo_y_)
+    - [cli       @ gbt/deploy](#cli___gbt_deploy_)
+    - [https       @ gbt/deploy](#https___gbt_deploy_)
+      - [issues       @ https/gbt/deploy](#issues___https_gbt_deploy_)
   - [down       @ deploy](#down___deploy_)
     - [nuclio_wrapper       @ down/deploy](#nuclio_wrapper___down_deplo_y_)
   - [functions       @ deploy](#functions___deploy_)
+    - [microsam       @ functions/deploy](#microsam___functions_deploy_)
+      - [variants       @ microsam/functions/deploy](#variants___microsam_functions_deplo_y_)
+      - [dbg       @ microsam/functions/deploy](#dbg___microsam_functions_deplo_y_)
     - [instanseg       @ functions/deploy](#instanseg___functions_deploy_)
       - [debug       @ instanseg/functions/deploy](#debug___instanseg_functions_deploy_)
     - [stardist       @ functions/deploy](#stardist___functions_deploy_)
@@ -37,7 +37,6 @@
       - [sam       @ cellvit/functions/deploy](#sam___cellvit_functions_deploy_)
       - [hipt       @ cellvit/functions/deploy](#hipt___cellvit_functions_deploy_)
       - [virchow       @ cellvit/functions/deploy](#virchow___cellvit_functions_deploy_)
-    - [microsam       @ functions/deploy](#microsam___functions_deploy_)
     - [openvino       @ functions/deploy](#openvino___functions_deploy_)
     - [iog       @ functions/deploy](#iog___functions_deploy_)
     - [sam       @ functions/deploy](#sam___functions_deploy_)
@@ -46,6 +45,10 @@
     - [debug       @ functions/deploy](#debug___functions_deploy_)
       - [vscode       @ debug/functions/deploy](#vscode___debug_functions_deploy_)
 - [data](#dat_a_)
+- [move](#mov_e_)
+  - [docker       @ move](#docker___move_)
+  - [containerd       @ move](#containerd___move_)
+- [prune       @ docker/free_space](#prune___docker_free_spac_e_)
 
 <!-- /MarkdownTOC -->
 
@@ -228,118 +231,9 @@ volumes:
       type: none
 ```
 
-<a id="docker___deploy_"></a>
-## docker       @ deploy-->cvat_setup
-https://stackoverflow.com/questions/59345566/move-docker-volume-to-different-partition
-sudo service docker stop  
 
-`Stopping 'docker.service', but its triggering units are still active`
-https://stackoverflow.com/questions/47489631/warning-stopping-docker-service-but-it-can-still-be-activated-by-docker-socke
-sudo systemctl stop docker.socket
-
-mkdir /home/NVME-8TB/docker
-mkdir /data/docker
-
-sudo gedit /etc/docker/daemon.json
-sudo nano /etc/docker/daemon.json
-
-```
-"data-root": "/home/NVME-8TB/docker",
-```
-```
-"data-root": "/data/docker",
-```
-```
-{
-    "data-root": "/data/docker",
-    "runtimes": {
-        "nvidia": {
-            "args": [],
-            "path": "nvidia-container-runtime"
-        }
-    }
-}
-```
-sudo rsync -aP /var/lib/docker/ /home/NVME-8TB/docker
-sudo rsync -aP /var/lib/docker/ /data/docker
-
-sudo mv /var/lib/docker /var/lib/docker.old
-
-sudo ln -s /home/NVME-8TB/docker /var/lib/docker
-sudo ln -s /data/docker /var/lib/docker
-
-sudo service docker start
-docker run --rm hello-world
-sudo rm -rf /var/lib/docker.old
-
-<a id="containerd___docker_deplo_y_"></a>
-### containerd       @ docker/deploy-->cvat_setup
-https://stackoverflow.com/a/73330152
-
-sudo service containerd stop
-
-sudo nano /etc/containerd/config.toml
-```
-root = "/data/containerd"
-```
-
-mkdir /home/NVME-8TB/containerd
-mkdir /data/containerd
-
-sudo rsync -aP /var/lib/containerd/ /home/NVME-8TB/containerd
-sudo rsync -aP /var/lib/containerd/ /data/containerd
-
-sudo rm -rf /var/lib/containerd
-
-sudo ln -s /home/NVME-8TB/containerd /var/lib/containerd
-sudo ln -s /data/containerd /var/lib/containerd
-
-sudo service containerd start
-
-
-<a id="prune___docker_deplo_y_"></a>
-### prune       @ docker/deploy-->cvat_setup
-`apparently works somewhat but not for snapshots`
-https://docs.docker.com/engine/manage-resources/pruning/
-
-https://docs.docker.com/reference/cli/docker/image/prune/
-docker image prune -a
-
-https://docs.docker.com/reference/cli/docker/container/prune/
-docker container ls
-docker ps --size
-docker container prune
-
-https://docs.docker.com/reference/cli/docker/volume/prune/
-docker volume ls
-docker volume prune
-
-`too much work to install`
-https://stackoverflow.com/a/73273842
-
-nerdctl is a Docker-compatible CLI for containerd.
-https://github.com/containerd/nerdctl
-
-nerdctl system prune --all
-
-`works better but not quite to actually prune anything`
-https://hexshift.medium.com/how-to-cleanly-remove-images-containers-and-snapshots-in-containerd-c477d4d7fd58
-sudo ctr namespaces list
-
-sudo ctr --namespace moby containers list
-sudo ctr --namespace moby_history containers list
-
-sudo ctr --namespace default images list
-sudo ctr --namespace moby images list
-
-sudo ctr --namespace moby snapshots list
-sudo ctr --namespace moby snapshots cleanup
-
-`garbage collector should do it by itself`
-https://github.com/containerd/containerd/issues/6294
-
-<a id="cli___docker_deplo_y_"></a>
-### cli       @ docker/deploy-->cvat_setup
+<a id="cli___gbt_deploy_"></a>
+### cli       @ gbt/deploy-->cvat_setup
 docker compose -f docker-compose.yml up -d
 
 http://localhost:8080/
@@ -354,15 +248,15 @@ CVAT_HOST=cvat.gilbertbigras.com sudo -E docker compose up -d
 
 docker compose down
 
-<a id="https___docker_deplo_y_"></a>
-### https       @ docker/deploy-->cvat_setup
+<a id="https___gbt_deploy_"></a>
+### https       @ gbt/deploy-->cvat_setup
 https://docs.cvat.ai/docs/administration/community/basics/installation/#deploy-secure-cvat-instance-with-https
 
 `this seems to be only meant for using the https server provided by Let’s Encrypt`
 CVAT_HOST=cvat.gilbertbigras.com docker compose -f docker-compose.yml -f docker-compose.https.yml up -d
 
-<a id="issues___https_docker_deplo_y_"></a>
-#### issues       @ https/docker/deploy-->cvat_setup
+<a id="issues___https_gbt_deploy_"></a>
+#### issues       @ https/gbt/deploy-->cvat_setup
 `Origin checking failed`
 `CSRF_TRUSTED_ORIGINS`
 
@@ -443,6 +337,54 @@ nuctl delete function pth-microsam --platform local --force
 nuctl delete function pth-facebookresearch-sam-vit-h --platform local --force
 nuctl delete function pth-facebookresearch-detectron2-retinanet-r101 --platform local
 
+<a id="microsam___functions_deploy_"></a>
+### microsam       @ functions/deploy-->cvat_setup
+docker system prune -a
+
+sudo chown -R abhineet: /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5343
+watch sudo cat /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5343/fs/opt/nuclio/microsam/nuctl_outputs.log
+sudo ls /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5283/fs/opt/nuclio/microsam/nuctl_outputs.log
+
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam
+docker logs nuclio-nuclio-pth-microsam -f
+nuctl delete function pth-microsam --platform local --force
+
+docker exec -it nuclio-nuclio-pth-microsam /bin/bash
+ssh-keygen -q -t rsa -N '' -C "microsam" -f /root/.ssh/id_rsa
+cat /root/.ssh/id_rsa.pub
+apt update && apt install ssh nano
+nano /root/.ssh/config
+ssh -R 5679:localhost:5679 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x99
+
+<a id="variants___microsam_functions_deplo_y_"></a>
+#### variants       @ microsam/functions/deploy-->cvat_setup
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_huge
+docker logs nuclio-nuclio-pth-microsam_hp_huge -f
+nuctl delete function pth-microsam_hp_huge --platform local --force
+
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_mi_base
+docker logs nuclio-nuclio-pth-microsam_mi_base -f
+nuctl delete function pth-microsam_mi_base --platform local --force
+
+
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_lm_large
+docker logs nuclio-nuclio-pth-microsam_lm_large -f
+nuctl delete function pth-microsam_lm_large --platform local --force
+
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_base
+docker logs nuclio-nuclio-pth-microsam_hp_base -f
+nuctl delete function pth-microsam_hp_base --platform local --force
+
+<a id="dbg___microsam_functions_deplo_y_"></a>
+#### dbg       @ microsam/functions/deploy-->cvat_setup
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_dummy
+
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam311
+./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam310
+
+nuctl delete function pth-microsam310 --platform local --force
+nuctl delete function pth-microsam311 --platform local --force
+
 <a id="instanseg___functions_deploy_"></a>
 ### instanseg       @ functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/instanseg instanseg
@@ -450,12 +392,7 @@ docker logs nuclio-nuclio-pth-instanSeg -f
 <a id="debug___instanseg_functions_deploy_"></a>
 #### debug       @ instanseg/functions/deploy-->cvat_setup
 docker exec -it nuclio-nuclio-pth-instanSeg /bin/bash
-apt update && apt install -y ssh nano
-docker exec -it nuclio-nuclio-pth-instanSeg nvidia-smi
-ssh-keygen
 cat /root/.ssh/id_rsa.pub
-nano /root/.ssh/config
-
 ssh -R 5678:localhost:5678 x99
 
 <a id="stardist___functions_deploy_"></a>
@@ -484,11 +421,6 @@ docker logs nuclio-nuclio-pth-cellvit-hipt -f
 #### virchow       @ cellvit/functions/deploy-->cvat_setup
 ./serverless/deploy_gpu.sh serverless/pytorch/cellvit cellvit-virchow
 docker logs nuclio-nuclio-pth-cellvit-virchow -f
-
-<a id="microsam___functions_deploy_"></a>
-### microsam       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam
-docker logs nuclio-nuclio-pth-microsam -f
 
 <a id="openvino___functions_deploy_"></a>
 ### openvino       @ functions/deploy-->cvat_setup
@@ -560,10 +492,6 @@ https://docs.cvat.ai/docs/guides/serverless-tutorial/#debugging-a-serverless-fun
 docker exec -it nuclio-nuclio-pth-microsam /bin/bash
 cat /root/.ssh/id_rsa.pub
 
-ssh -R 5679:localhost:5679 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x99
-
-docker logs nuclio-nuclio-pth-microsam -f
-
 
 <a id="dat_a_"></a>
 # data
@@ -574,6 +502,133 @@ https://github.com/cvat-ai/cvat/issues/4675#issuecomment-1148547464
 /var/lib/docker/volumes/cvat_cvat_data/_data/cache
 raw images for a project
 /var/lib/docker/volumes/cvat_cvat_data/_data/data/48/raw
+
+<a id="mov_e_"></a>
+# move
+
+<a id="docker___move_"></a>
+## docker       @ move-->cvat_setup
+https://stackoverflow.com/questions/59345566/move-docker-volume-to-different-partition
+sudo service docker stop  
+
+`Stopping 'docker.service', but its triggering units are still active`
+https://stackoverflow.com/questions/47489631/warning-stopping-docker-service-but-it-can-still-be-activated-by-docker-socke
+sudo systemctl stop docker.socket
+
+mkdir /home/NVME-8TB/docker
+mkdir /data/docker
+
+sudo gedit /etc/docker/daemon.json
+sudo nano /etc/docker/daemon.json
+
+```
+"data-root": "/home/NVME-8TB/docker",
+```
+```
+"data-root": "/data/docker",
+```
+```
+{
+    "data-root": "/data/docker",
+    "runtimes": {
+        "nvidia": {
+            "args": [],
+            "path": "nvidia-container-runtime"
+        }
+    }
+}
+```
+sudo rsync -aP /var/lib/docker/ /home/NVME-8TB/docker
+sudo rsync -aP /var/lib/docker/ /data/docker
+
+sudo mv /var/lib/docker /var/lib/docker.old
+
+sudo ln -s /home/NVME-8TB/docker /var/lib/docker
+sudo ln -s /data/docker /var/lib/docker
+
+sudo service docker start
+docker run --rm hello-world
+sudo rm -rf /var/lib/docker.old
+
+<a id="containerd___move_"></a>
+## containerd       @ move-->cvat_setup
+https://stackoverflow.com/a/73330152
+
+sudo service containerd stop
+
+sudo nano /etc/containerd/config.toml
+```
+root = "/data/containerd"
+```
+
+mkdir /home/NVME-8TB/containerd
+mkdir /data/containerd
+
+sudo rsync -aP /var/lib/containerd/ /home/NVME-8TB/containerd
+sudo rsync -aP /var/lib/containerd/ /data/containerd
+
+sudo rm -rf /var/lib/containerd
+
+sudo ln -s /home/NVME-8TB/containerd /var/lib/containerd
+sudo ln -s /data/containerd /var/lib/containerd
+
+sudo service containerd start
+
+<a id="prune___docker_free_spac_e_"></a>
+# prune       @ docker/free_space-->cvat_setup
+https://forums.docker.com/t/how-to-delete-cache/5753
+
+`seems to work – Total reclaimed space: 506.8GB`
+docker system prune -a
+
+`doesn't seem to do much`
+alias docker_clean_images='docker rmi $(docker images -a --filter=dangling=true -q)'
+alias docker_clean_ps='docker rm $(docker ps --filter=status=exited --filter=status=created -q)'
+docker_clean_images
+docker_clean_ps
+
+`doesn't seem to do much`
+docker builder prune
+
+`apparently works somewhat but not for snapshots`
+https://docs.docker.com/engine/manage-resources/pruning/
+
+https://docs.docker.com/reference/cli/docker/image/prune/
+docker image prune -a
+
+https://docs.docker.com/reference/cli/docker/container/prune/
+docker container ls
+docker ps --size
+docker container prune
+
+https://docs.docker.com/reference/cli/docker/volume/prune/
+docker volume ls
+docker volume prune
+
+
+`too much work to install`
+https://stackoverflow.com/a/73273842
+
+nerdctl is a Docker-compatible CLI for containerd.
+https://github.com/containerd/nerdctl
+
+nerdctl system prune --all
+
+`works better but not quite to actually prune anything`
+https://hexshift.medium.com/how-to-cleanly-remove-images-containers-and-snapshots-in-containerd-c477d4d7fd58
+sudo ctr namespaces list
+
+sudo ctr --namespace moby containers list
+sudo ctr --namespace moby_history containers list
+
+sudo ctr --namespace default images list
+sudo ctr --namespace moby images list
+
+sudo ctr --namespace moby snapshots list
+sudo ctr --namespace moby snapshots cleanup
+
+`garbage collector should do it by itself`
+https://github.com/containerd/containerd/issues/6294
 
 
 

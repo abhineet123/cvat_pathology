@@ -1,8 +1,8 @@
 metadata:
-  name: pth-microsam
+  name: pth-microsam_lm_large
   namespace: cvat
   annotations:
-    name: MicroSAM (ViT-Tiny)
+    name: MicroSAM (ViT-Large)
     version: 2
     # type: tracker
     type: interactor
@@ -12,7 +12,7 @@ metadata:
     startswith_box: true
 
 spec:
-  description: MicroSAM (ViT-Tiny)
+  description: MicroSAM (ViT-Large)
   runtime: 'python:3.12'
   handler: main:handler
   eventTimeout: 300s
@@ -21,7 +21,7 @@ spec:
       value: /opt/nuclio/microsam
 
   build:
-    image: cvat.pth.microsam:latest-gpu
+    image: cvat.pth.microsam_lm_large:latest-gpu
     baseImage: ubuntu:22.04
 
     directives:
@@ -31,6 +31,9 @@ spec:
           value: NVIDIA_VISIBLE_DEVICES=all
         - kind: ENV
           value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set microsam variant
+        - kind: ENV
+          value: MICROSAM_VARIANT=vit_l_lm
       # disable interactive frontend
         - kind: ENV
           value: DEBIAN_FRONTEND=noninteractive
@@ -39,9 +42,7 @@ spec:
           value: /opt/nuclio/microsam
       # install basic deps
         - kind: RUN
-          value: apt-get update && apt-get -y install ssh nano wget git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
-        # - kind: RUN
-          # value: test_break
+          value: apt-get update && apt-get -y install ssh nano unzip wget curl git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
 
       # set up debugging
         # - kind: RUN
@@ -76,15 +77,13 @@ spec:
         - kind: RUN
           value: which python
         - kind: RUN
-          value: ln -sf /root/miniforge3/envs/microsam_conda/bin/python /usr/bin/python
-        - kind: RUN
-          value: ln -sf /root/miniforge3/envs/microsam_conda/bin/python3 /usr/bin/python3
-        - kind: RUN
           value: python -V
         # - kind: RUN
         #   value: python -m pip install nuclio-sdk
         # - kind: RUN
         #   value: python -c 'import nuclio_sdk'
+        # - kind: RUN
+          # value: nazio
         - kind: RUN
           value: git clone https://github.com/abhineet123/microsam_private microsam
         - kind: RUN

@@ -1,15 +1,19 @@
 <!-- MarkdownTOC -->
 
 - [install](#install_)
+    - [issues       @ install](#issues___instal_l_)
     - [fiftyone       @ install](#fiftyone___instal_l_)
         - [delete       @ fiftyone/install](#delete___fiftyone_install_)
         - [start       @ fiftyone/install](#start___fiftyone_install_)
     - [instanseg       @ install](#instanseg___instal_l_)
     - [stardist       @ install](#stardist___instal_l_)
     - [cellpose       @ install](#cellpose___instal_l_)
+    - [microsam       @ install](#microsam___instal_l_)
+        - [conda       @ microsam/install](#conda___microsam_install_)
+        - [venv       @ microsam/install](#venv___microsam_install_)
     - [cellvit       @ install](#cellvit___instal_l_)
         - [shared       @ cellvit/install](#shared___cellvit_instal_l_)
-    - [issues       @ install](#issues___instal_l_)
+    - [issues       @ install](#issues___instal_l__1)
 - [f2gbt       @ install](#f2gbt___instal_l_)
 
 <!-- /MarkdownTOC -->
@@ -21,9 +25,19 @@ pip install cvat-cli paramparse
 pip uninstall opencv-python-headless
 pip install --upgrade opencv-python
 
+add2virtualenv /home/abhineet/microsam
+add2virtualenv /home/abhineet/cellvit
+
 export CVAT_ACCESS_TOKEN="AHxpPZmI.jfchlo1EKTq4PpbqYSRerZq0eMAt69GN"
 cvat-cli --server-host http://104.205.236.116 --server-port 8080 task ls
 cd cvat-sdk/cvat_sdk/auto_annotation/functions
+
+<a id="issues___instal_l_"></a>
+## issues       @ install-->cvataa_setup
+`opencv imshow hangs up`
+probably some sort of conflict between pencv-python and pencv-python-headless
+go to site-packages and remove cv2 and opencv-python folders if pip uninstall does not work
+
 
 <a id="fiftyone___instal_l_"></a>
 ## fiftyone       @ install-->cvataa_setup
@@ -62,6 +76,60 @@ mkvirtualenv -p python3.10  cellpose
 python -m pip install scikit-image
 python -m pip install cellpose
 
+<a id="microsam___instal_l_"></a>
+## microsam       @ install-->cvataa_setup
+git clone https://github.com/abhineet123/microsam_private microsam
+cd microsam
+
+<a id="conda___microsam_install_"></a>
+### conda       @ microsam/install-->cvataa_setup
+https://computational-cell-analytics.github.io/micro-sam/micro_sam.html#from-source
+conda env create -f environment.yaml
+conda activate microsam_conda
+pip install -e .
+pip install paramparse tqdm cvat-cli opencv-python
+
+conda env update -n base --file environment.yaml
+
+echo $CONDA_PREFIX
+
+/home/abhineet/miniforge3/envs/microsam_conda/bin/
+
+pip install opencv-python
+pip uninstall opencv-python
+conda uninstall opencv-python-headless
+
+<a id="venv___microsam_install_"></a>
+### venv       @ microsam/install-->cvataa_setup
+mkvirtualenv -p python3.12  microsam_pip
+pip install -r requirements.txt
+
+
+pip uninstall nifty
+
+pip install nifty>=1.2.3
+pip install imagecodecs
+pip install magicgui
+pip install napari
+pip install natsort
+pip install pooch
+pip install pyqt5
+pip install elf >=0.7.1
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+pip install segment-anything
+pip install tqdm
+pip install timm
+pip install trackastra
+pip install xarray
+pip install xxhash
+pip install zarr
+pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+pip install paramparse cvat-cli opencv-python
+
+`does not work`
+pip install -r requirements-dev.txt
+
+
 <a id="cellvit___instal_l_"></a>
 ## cellvit       @ install-->cvataa_setup
 mkvirtualenv -p python3.10  cellvit
@@ -89,7 +157,7 @@ pip uninstall opencv-python
 python -m pip install cellvit
 pip install numpy==2.2.6
 
-<a id="issues___instal_l_"></a>
+<a id="issues___instal_l__1"></a>
 ## issues       @ install-->cvataa_setup
 `fiftyone exited with error 100:`
 https://stackoverflow.com/a/76944357

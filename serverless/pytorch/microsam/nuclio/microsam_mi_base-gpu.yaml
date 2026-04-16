@@ -1,8 +1,8 @@
 metadata:
-  name: pth-microsam
+  name: pth-microsam_mi_base
   namespace: cvat
   annotations:
-    name: MicroSAM (ViT-Tiny)
+    name: MedicoSAM (ViT-Base)
     version: 2
     # type: tracker
     type: interactor
@@ -12,7 +12,7 @@ metadata:
     startswith_box: true
 
 spec:
-  description: MicroSAM (ViT-Tiny)
+  description: MedicoSAM (ViT-Base)
   runtime: 'python:3.12'
   handler: main:handler
   eventTimeout: 300s
@@ -21,7 +21,7 @@ spec:
       value: /opt/nuclio/microsam
 
   build:
-    image: cvat.pth.microsam:latest-gpu
+    image: cvat.pth.microsam_mi_base:latest-gpu
     baseImage: ubuntu:22.04
 
     directives:
@@ -34,6 +34,9 @@ spec:
       # disable interactive frontend
         - kind: ENV
           value: DEBIAN_FRONTEND=noninteractive
+      # set microsam variant
+        - kind: ENV
+          value: MICROSAM_VARIANT=vit_b_medical_imaging
       # set workdir
         - kind: WORKDIR
           value: /opt/nuclio/microsam

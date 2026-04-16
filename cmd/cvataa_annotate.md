@@ -41,6 +41,7 @@
     - [stardist       @ TNBC-HandE](#stardist___tnbc_hande_)
     - [instanseg       @ TNBC-HandE](#instanseg___tnbc_hande_)
     - [cellpose       @ TNBC-HandE](#cellpose___tnbc_hande_)
+    - [microsam       @ TNBC-HandE](#microsam___tnbc_hande_)
     - [cellvit       @ TNBC-HandE](#cellvit___tnbc_hande_)
 
 <!-- /MarkdownTOC -->
@@ -101,7 +102,7 @@ python cvataa/annotate_tasks.py filter.iall=UpperGI,E11,512 models=cellpose
 
 <a id="a12___cellpose_cervix_hnscc_nsclc_upperg_i_"></a>
 ### A12       @ cellpose/Cervix,HNSCC,NSCLC,UpperGI-->cvataa_annotate
-python cvataa/annotate_tasks.py filter.iall=HNSCC,A11,512 models=cellpose
+python cvataa/annotate_tasks.py filter.iall=HNSCC,A12,512 models=cellpose
 
 <a id="instanseg___cervix_hnscc_nsclc_uppergi__1"></a>
 ## instanseg       @ Cervix,HNSCC,NSCLC,UpperGI-->cvataa_annotate
@@ -247,6 +248,11 @@ python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=1024 models=i
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=256 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=1024 models=cellpose
+
+<a id="microsam___tnbc_hande_"></a>
+## microsam       @ TNBC-HandE-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC-HandE,D10 filter.iany=512 models=microsam
+
 
 <a id="cellvit___tnbc_hande_"></a>
 ## cellvit       @ TNBC-HandE-->cvataa_annotate

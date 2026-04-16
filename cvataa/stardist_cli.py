@@ -18,7 +18,7 @@ from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
 
 
 class StardistCLI(CellSegCLIBase):
-    def __init__(self, task_name, n_frames, verbose=True) -> None:
+    def __init__(self, task_name, n_frames, verbose=True, **kwargs) -> None:
         CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "StarDist")
         self.predictor = StarDist2D.from_pretrained("2D_versatile_he")
 

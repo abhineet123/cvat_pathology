@@ -60,6 +60,7 @@ spec:
       numWorkers: 1
       kind: 'http'
       workerAvailabilityTimeoutMilliseconds: 10000
+      port: 12353
       attributes:
         maxRequestBodySize: 33554432 # 32MB
   resources:

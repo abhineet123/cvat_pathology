@@ -69,8 +69,14 @@ spec:
       #   - kind: ENV
       #     value: CUDA_HOME=/usr/local/cuda-12.2
       # set up debugging
-        # - kind: RUN
-        #   value: pip3 install debugpy
+        - kind: RUN
+          value: pip3 install debugpy
+        - kind: RUN
+          value: apt update && apt install -y ssh nano
+        - kind: RUN
+          value: ssh-keygen -q -t rsa -N '' -C "microsam" -f /root/.ssh/id_rsa
+        - kind: RUN
+          value: echo "Host x99\nUser abhineet\nHostName 192.168.1.138\nPort 3152\n" >> /root/.ssh/config
       # clone custom instanseg
         - kind: RUN
           value: git clone https://github.com/abhineet123/instanseg
@@ -83,7 +89,7 @@ spec:
       numWorkers: 1
       kind: 'http'
       workerAvailabilityTimeoutMilliseconds: 1000
-      port: 12345
+      port: 12346
       attributes:
         maxRequestBodySize: 33554432 # 32MB
 

@@ -47,6 +47,8 @@ def main():
 
         task_name_to_id = {task["_model"]["name"]: task["_model"]["id"] for task in tasks_dict}
         task_name_to_dict = {task["_model"]["name"]: task["_model"] for task in tasks_dict}
+        task_name_to_obj = {task["_model"]["name"]: task for task in tasks_dict}
+
         project_name_to_id = {
             project["_model"]["name"]: project["_model"]["id"] for project in projects_dict
         }
@@ -77,6 +79,27 @@ def main():
                         Model = functools.partial(CellvitCLI, model_type="virchow")
                     else:
                         raise AssertionError(f"invalid cellvit model {model}")
+                elif "microsam" in model:
+                    from microsam_cli import MicroSAMCLI
+
+                    if model == "microsam":
+                        Model = MicroSAMCLI
+                    elif model == "microsam-l_lm":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_l_lm")
+                    elif model == "microsam-b_lm":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_b_lm")
+                    elif model == "microsam-t_lm":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_t_lm")
+                    elif model == "microsam-h_hist":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_h_histopathology")
+                    elif model == "microsam-l_hist":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_l_histopathology")
+                    elif model == "microsam-b_hist":
+                        Model = functools.partial(MicroSAMCLI, model_type="vit_b_histopathology")
+                    else:
+                        raise AssertionError(f"invalid cellvit model {model}")
+
+                    Model = MicroSAMCLI
                 elif model == "ensemble":
                     from cell_seg_ensemble import CellSegEnsembleCLI
 
@@ -96,14 +119,40 @@ def main():
 
             relevant_task_names.sort()
 
+            task_name_to_obj = {
+                task_name: task_name_to_obj[task_name] for task_name in relevant_task_names
+            }
+            task_name_to_id = {
+                task_name: task_name_to_obj[task_name]["_model"]["id"]
+                for task_name in relevant_task_names
+            }
             print(
                 f"\nannotating {len(relevant_task_names)} tasks:\n{to_str(relevant_task_names)}\n"
             )
 
             n_tasks = len(relevant_task_names)
             for i, task_name in enumerate(relevant_task_names):
+                task_id = task_name_to_id[task_name]
+                task = client.tasks.retrieve(task_id)
+                annotations = task.get_annotations()
+                shapes = annotations["shapes"]
+
+                frames_info = task.get_frames_info()
+                frames_dicts = [frame_info.to_dict() for frame_info in frames_info]
+                frame_name_to_shapes = {
+                    frame_dict["name"]: [
+                        shape.to_dict() for shape in shapes if shape["frame"] == frame_id
+                    ]
+                    for frame_id, frame_dict in enumerate(frames_dicts)
+                }
+
                 n_frames = task_name_to_dict[task_name]["size"]
-                func = Model(task_name=task_name, n_frames=n_frames, verbose=False)
+                func = Model(
+                    task_name=task_name,
+                    n_frames=n_frames,
+                    frame_name_to_shapes=frame_name_to_shapes,
+                    verbose=False,
+                )
                 print(f"\nannotating task {i+1} / {n_tasks}: {task_name}\n")
                 # pbar = progress.BaseProgressReporter()
                 try:

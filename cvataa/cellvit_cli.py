@@ -1,8 +1,13 @@
+def linux_path(*args, **kwargs):
+    return os.path.join(*args, **kwargs).replace(os.sep, "/")
+
+
 # from typing import List
 # from tqdm import tqdm
 import PIL.Image
 import numpy as np
-import cv2
+
+
 import os
 
 # import ray
@@ -12,37 +17,35 @@ import torch
 from torchvision import transforms as T
 import torch.nn.functional as F
 
-from cellvit.models.cell_segmentation.cellvit import CellViT
-from cellvit.models.cell_segmentation.cellvit_256 import CellViT256
-from cellvit.models.cell_segmentation.cellvit_sam import CellViTSAM
-from cellvit.models.cell_segmentation.cellvit_virchow import CellViTVirchow
-from cellvit.models.cell_segmentation.cellvit_uni import CellViTUNI
 
-
-from cellvit.inference.postprocessing_cupy import (
-    DetectionCellPostProcessorCupy as DetectionCellPostProcessor,
-)
-
-# from cellvit_postprocessing import DetectionCellPostProcessor
-
-from cellvit.utils.tools import unflatten_dict
+import sys
 
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 
-from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase, linux_path
+from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
 
 
 class CellvitCLI(CellSegCLIBase):
-    def __init__(self, task_name, n_frames, model_type="sam", verbose=True) -> None:
+    def __init__(self, task_name, n_frames, model_type="sam", verbose=True, **kwargs) -> None:
         CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "CellVIT")
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+        cellvit_path = linux_path(os.path.expanduser("~"), "cellvit")
+        sys.path.append(cellvit_path)
+
+        from cellvit.inference.postprocessing_cupy import (
+            DetectionCellPostProcessorCupy as DetectionCellPostProcessor,
+        )
+
+        # from cellvit_postprocessing import DetectionCellPostProcessor
+        from cellvit.utils.tools import unflatten_dict
+
         # Resolution for inference. Defaults to 0.25.
         self.resolution = 0.25
 
-        self.model_root = "cvataa/cellvit/pretrained"
+        self.model_root = linux_path(cellvit_path, "pretrained")
 
         if model_type == "sam":
             self.model_path = "SAM/CellViT-SAM-H-x40-AMP.pth"
@@ -66,6 +69,8 @@ class CellvitCLI(CellSegCLIBase):
         print(f"creating model: {self.model_type}")
 
         if self.model_type in ["CellViT"]:
+            from cellvit.models.cell_segmentation.cellvit import CellViT
+
             self.model = CellViT(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -78,6 +83,8 @@ class CellvitCLI(CellSegCLIBase):
             )
 
         elif self.model_type in ["CellViT256"]:
+            from cellvit.models.cell_segmentation.cellvit_256 import CellViT256
+
             self.model = CellViT256(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -85,6 +92,8 @@ class CellvitCLI(CellSegCLIBase):
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
         elif self.model_type in ["CellVirchow"]:
+            from cellvit.models.cell_segmentation.cellvit_virchow import CellViTVirchow
+
             self.model = CellViTVirchow(
                 model_virchow_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -92,6 +101,8 @@ class CellvitCLI(CellSegCLIBase):
             )
 
         elif self.model_type in ["CellViTSAM"]:
+            from cellvit.models.cell_segmentation.cellvit_sam import CellViTSAM
+
             self.model = CellViTSAM(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -100,6 +111,8 @@ class CellvitCLI(CellSegCLIBase):
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
         elif self.pretrained_model == "CellViTUNI":
+            from cellvit.models.cell_segmentation.cellvit_uni import CellViTUNI
+
             model = CellViTUNI(
                 model_uni_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],

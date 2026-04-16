@@ -1,8 +1,8 @@
 metadata:
-  name: pth-microsam
+  name: pth-microsam310
   namespace: cvat
   annotations:
-    name: MicroSAM (ViT-Tiny)
+    name: Segment Anything for Microscopy
     version: 2
     # type: tracker
     type: interactor
@@ -12,16 +12,16 @@ metadata:
     startswith_box: true
 
 spec:
-  description: MicroSAM (ViT-Tiny)
-  runtime: 'python:3.12'
+  description: Interactive nucleus segmentation with Segment Anything for Microscopy
+  runtime: 'python:3.10'
   handler: main:handler
   eventTimeout: 300s
   env:
     - name: PYTHONPATH
-      value: /opt/nuclio/microsam
+      value: /opt/nuclio/microsam310
 
   build:
-    image: cvat.pth.microsam:latest-gpu
+    image: cvat.pth.microsam310:latest-gpu
     baseImage: ubuntu:22.04
 
     directives:
@@ -36,20 +36,18 @@ spec:
           value: DEBIAN_FRONTEND=noninteractive
       # set workdir
         - kind: WORKDIR
-          value: /opt/nuclio/microsam
+          value: /opt/nuclio/microsam310
       # install basic deps
         - kind: RUN
-          value: apt-get update && apt-get -y install ssh nano wget git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
-        # - kind: RUN
-          # value: test_break
+          value: apt-get update && apt-get -y install unzip wget curl git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
 
       # set up debugging
-        # - kind: RUN
-        #   value: apt update && apt install -y ssh nano
-        # - kind: RUN
-        #   value: ssh-keygen -q -t rsa -N '' -C "microsam" -f /root/.ssh/id_rsa
-        # - kind: RUN
-        #   value: echo "Host x99\nUser abhineet\nHostName 192.168.1.138\nPort 3152\n" >> /root/.ssh/config
+        - kind: RUN
+          value: apt update && apt install -y ssh nano
+        - kind: RUN
+          value: ssh-keygen -q -t rsa -N '' -C "microsam310" -f /root/.ssh/id_rsa
+        - kind: RUN
+          value: echo "Host x99\nUser abhineet\nHostName 192.168.1.138\nPort 3152\n" >> /root/.ssh/config
 
       # install conda
         - kind: RUN
@@ -70,35 +68,35 @@ spec:
           value: which conda
       # install microsam
         - kind: RUN
-          value: conda create -n microsam_conda python=3.12
+          value: conda create -n microsam310 python=3.10
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/microsam_private microsam310
+        - kind: RUN
+          # value: cd microsam310 && conda env create -f environment.yaml
+          value: cd microsam310 && conda env update -n microsam310 --file environment.yaml
+          # value: cd microsam310 && conda env update -n base --file environment.yaml
         - kind: ENV
-          value: PATH=$PATH:/root/miniforge3/envs/microsam_conda/bin
+          value: PATH=$PATH:/root/miniforge3/envs/microsam310/bin
         - kind: RUN
           value: which python
         - kind: RUN
-          value: ln -sf /root/miniforge3/envs/microsam_conda/bin/python /usr/bin/python
-        - kind: RUN
-          value: ln -sf /root/miniforge3/envs/microsam_conda/bin/python3 /usr/bin/python3
-        - kind: RUN
           value: python -V
         # - kind: RUN
-        #   value: python -m pip install nuclio-sdk
+          # value: nazio
         # - kind: RUN
-        #   value: python -c 'import nuclio_sdk'
+          # value: /root/miniforge3/condabin/conda activate microsam_conda
         - kind: RUN
-          value: git clone https://github.com/abhineet123/microsam_private microsam
+          value: cd microsam310 && pip install -e .
         - kind: RUN
-          # value: cd microsam && conda env create -f environment.yaml
-          value: cd microsam && conda env update -n microsam_conda --file environment.yaml
-          # value: cd microsam && conda env update -n base --file environment.yaml
+          value: python -c 'from micro_sam.prompt_based_segmentation import segment_from_box'
         # - kind: RUN
           # value: nazio
         - kind: RUN
-          value: cd microsam && python -m pip install -e .
+          value: pip install paramparse cvat-cli opencv-python debugpy
         - kind: RUN
-          value: python -c 'from micro_sam.prompt_based_segmentation import segment_from_box'
-        - kind: RUN
-          value: python -m pip install paramparse cvat-cli opencv-python
+          value: pip install numpy==1.26.4
+
+
 
   triggers:
     myHttpTrigger:

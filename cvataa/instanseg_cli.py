@@ -15,7 +15,7 @@ from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
 
 
 class InstansegCLI(CellSegCLIBase):
-    def __init__(self, task_name, n_frames, verbose=True) -> None:
+    def __init__(self, task_name, n_frames, verbose=True, **kwargs) -> None:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "InstanSeg")
         self.predictor = InstanSeg("brightfield_nuclei", verbosity=0, device=self.device)

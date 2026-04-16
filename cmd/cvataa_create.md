@@ -76,6 +76,9 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Til
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=instanseg,stardist,cellpose 
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=cellvit filter.iall=D10
+
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=microsam filter.iall=D10
+
 <a id="1024___tnbc_"></a>
 ## 1024       @ TNBC-->cvataa_create
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-1024 directory=TNBC-Tiles/1024 model_suffixes=cellpose 
@@ -103,6 +106,9 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-HandE-512 directory=TN
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-HandE-512 directory=TNBC-HandE-Tiles/512 model_suffixes=cellpose 
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-HandE-512 directory=TNBC-HandE-Tiles/512 model_suffixes=cellvit filter.iall=D10
+
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-HandE-512 directory=TNBC-HandE-Tiles/512 model_suffixes=microsam filter.iall=D10
+
 <a id="1024___tnbc_hande_"></a>
 ## 1024       @ TNBC-HandE-->cvataa_create
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-HandE-1024 directory=TNBC-HandE-Tiles/1024 model_suffixes=instanseg,stardist,cellpose 

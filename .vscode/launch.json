@@ -77,6 +77,19 @@
 			}
 		},
 		{
+			"name": "annotate tasks microsam",
+			"python": "/home/abhineet/.virtualenvs/microsam_pip/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 models=microsam",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
 			"name": "visualize tasks local",
 			"type": "debugpy",
 			"request": "launch",
@@ -119,6 +132,21 @@
 			"program": "${workspaceFolder}/cvataa/cellpose_run.py",
 			"console": "integratedTerminal",
 			"args": ""
+		},
+		{
+			"name": "microsam serverless debug",
+			"type": "debugpy",
+			"request": "attach",
+			"connect": {
+				"host": "localhost",
+				"port": 5679
+			},
+			"pathMappings": [
+				{
+					"localRoot": "${workspaceFolder}/serverless/pytorch/microsam/nuclio",
+					"remoteRoot": "/opt/nuclio"
+				}
+			]
 		},
 		{
 			"name": "instanseg serverless debug",
