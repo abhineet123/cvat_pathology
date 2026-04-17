@@ -73,7 +73,7 @@ pip install stardist
 <a id="cellpose___instal_l_"></a>
 ## cellpose       @ install-->cvataa_setup
 mkvirtualenv -p python3.10  cellpose
-python -m pip install scikit-image
+python -m pip install scikit-image numpy==1.26.4
 python -m pip install cellpose
 
 <a id="microsam___instal_l_"></a>

@@ -73,7 +73,7 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Til
 
 <a id="512___tnbc_"></a>
 ## 512       @ TNBC-->cvataa_create
-python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=instanseg,stardist,cellpose 
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=instanseg,stardist,cellpose filter.iall=D10
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=cellvit filter.iall=D10
 

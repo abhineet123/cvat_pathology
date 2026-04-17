@@ -13,39 +13,21 @@
     - [list       @ cvat/install](#list___cvat_install_)
     - [logs       @ cvat/install](#logs___cvat_install_)
     - [admin_user       @ cvat/install](#admin_user___cvat_install_)
+      - [access_tokens       @ admin_user/cvat/install](#access_tokens___admin_user_cvat_instal_l_)
     - [nuctl       @ cvat/install](#nuctl___cvat_install_)
 - [deploy       @ serverless/cvat/install](#deploy___serverless_cvat_instal_l_)
   - [x99       @ deploy](#x99___deploy_)
-    - [serverless       @ x99/deploy](#serverless___x99_deploy_)
   - [gbt       @ deploy](#gbt___deploy_)
-    - [volumes       @ gbt/deploy](#volumes___gbt_deploy_)
-      - [cvat_volumes       @ volumes/gbt/deploy](#cvat_volumes___volumes_gbt_deploy_)
-    - [cli       @ gbt/deploy](#cli___gbt_deploy_)
-    - [https       @ gbt/deploy](#https___gbt_deploy_)
-      - [issues       @ https/gbt/deploy](#issues___https_gbt_deploy_)
   - [down       @ deploy](#down___deploy_)
     - [nuclio_wrapper       @ down/deploy](#nuclio_wrapper___down_deplo_y_)
-  - [functions       @ deploy](#functions___deploy_)
-    - [microsam       @ functions/deploy](#microsam___functions_deploy_)
-      - [hp       @ microsam/functions/deploy](#hp___microsam_functions_deplo_y_)
-      - [lm       @ microsam/functions/deploy](#lm___microsam_functions_deplo_y_)
-      - [mi       @ microsam/functions/deploy](#mi___microsam_functions_deplo_y_)
-      - [dbg       @ microsam/functions/deploy](#dbg___microsam_functions_deplo_y_)
-    - [instanseg       @ functions/deploy](#instanseg___functions_deploy_)
-      - [debug       @ instanseg/functions/deploy](#debug___instanseg_functions_deploy_)
-    - [stardist       @ functions/deploy](#stardist___functions_deploy_)
-    - [cellpose       @ functions/deploy](#cellpose___functions_deploy_)
-    - [cellvit       @ functions/deploy](#cellvit___functions_deploy_)
-      - [sam       @ cellvit/functions/deploy](#sam___cellvit_functions_deploy_)
-      - [hipt       @ cellvit/functions/deploy](#hipt___cellvit_functions_deploy_)
-      - [virchow       @ cellvit/functions/deploy](#virchow___cellvit_functions_deploy_)
-    - [openvino       @ functions/deploy](#openvino___functions_deploy_)
-    - [iog       @ functions/deploy](#iog___functions_deploy_)
-    - [sam       @ functions/deploy](#sam___functions_deploy_)
-    - [retinanet_r101       @ functions/deploy](#retinanet_r101___functions_deploy_)
-    - [manage       @ functions/deploy](#manage___functions_deploy_)
-    - [debug       @ functions/deploy](#debug___functions_deploy_)
-      - [vscode       @ debug/functions/deploy](#vscode___debug_functions_deploy_)
+- [debug](#debug_)
+  - [x99       @ debug](#x99___debu_g_)
+  - [gbt       @ debug](#gbt___debu_g_)
+    - [volumes       @ gbt/debug](#volumes___gbt_debu_g_)
+      - [cvat_volumes       @ volumes/gbt/debug](#cvat_volumes___volumes_gbt_debu_g_)
+    - [cli       @ gbt/debug](#cli___gbt_debu_g_)
+    - [https       @ gbt/debug](#https___gbt_debu_g_)
+      - [issues       @ https/gbt/debug](#issues___https_gbt_debu_g_)
 - [data](#dat_a_)
 - [move](#mov_e_)
   - [docker       @ move](#docker___move_)
@@ -107,12 +89,11 @@ sudo apt-get update
 
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+sudo apt-get remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
 sudo groupadd docker
 sudo usermod -aG docker abhineet
 sudo usermod -aG docker gilbert
-
-/var/lib/containerd
-
 
 <a id="nvidia___instal_l_"></a>
 ## nvidia       @ install-->cvat_setup
@@ -164,7 +145,6 @@ docker compose ps --services --status=running
 sudo docker logs cvat_ui -f
 sudo docker logs cvat_server -f
 sudo docker logs nuclio -f
-sudo docker logs cvat.pth.instanseg:latest-gpu -f
 
 sudo docker inspect --format '{{ index .Config.Labels "traefik.http.routers.cvat.rule"}}' cvat_server
 
@@ -173,6 +153,10 @@ curl -Lv 104.205.236.116:8080
 <a id="admin_user___cvat_install_"></a>
 ### admin_user       @ cvat/install-->cvat_setup
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+
+<a id="access_tokens___admin_user_cvat_instal_l_"></a>
+#### access_tokens       @ admin_user/cvat/install-->cvat_setup
+https://docs.cvat.ai/docs/api_sdk/access_tokens/#how-to-create-a-personal-access-token
 
 <a id="nuctl___cvat_install_"></a>
 ### nuctl       @ cvat/install-->cvat_setup
@@ -187,6 +171,50 @@ sudo ln -sf $(pwd)/nuctl-1.15.9-linux-amd64 /usr/local/bin/nuctl
 # deploy       @ serverless/cvat/install-->cvat_setup
 <a id="x99___deploy_"></a>
 ## x99       @ deploy-->cvat_setup
+CVAT_HOST=104.205.236.116 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
+
+<a id="gbt___deploy_"></a>
+## gbt       @ deploy-->cvat_setup
+CVAT_HOST=cvat.gilbertbigras.com docker compose -f docker-compose.yml -f docker-compose.gbt.yml -f components/serverless/docker-compose.serverless.yml up -d
+
+<a id="down___deploy_"></a>
+## down       @ deploy-->cvat_setup
+docker compose down
+
+`Network cvat_cvat Resource is still in use ` 
+docker network inspect cvat_cvat
+
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-detectron2-retinanet-r101
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-sam-vit-h
+docker network disconnect -f cvat_cvat nuclio-nuclio-openvino-omz-public-mask-rcnn-inception-resnet-v2-atrous-coco
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-shiyinzhang-iog
+
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanSeg
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-stardist
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellpose
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-sam
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-hipt
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-virchow
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_hp_base
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_hp_huge
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_lm_large
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_mi_base
+
+docker network disconnect -f cvat_cvat nuclio
+
+docker logs cvat_db -f
+docker logs cvat_server -f
+docker logs nuclio -f
+
+<a id="nuclio_wrapper___down_deplo_y_"></a>
+### nuclio_wrapper       @ down/deploy-->cvat_setup
+ps -p 2268310 -o pid,vsz=MEMORY -o user,group=GROUP -o comm,args=ARGS
+
+<a id="debug_"></a>
+# debug 
+<a id="x99___debu_g_"></a>
+## x99       @ debug-->cvat_setup
 http://localhost:8080/
 http://104.205.236.116:8080/
 
@@ -198,22 +226,12 @@ export CVAT_HOST=localhost:8070
 CVAT_HOST=104.205.236.116 docker compose up -d
 
 CVAT_HOST=104.205.236.116 sudo -E docker compose up -d
-
-
-<a id="serverless___x99_deploy_"></a>
-### serverless       @ x99/deploy-->cvat_setup
-CVAT_HOST=104.205.236.116 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
-
-docker compose down
-
-<a id="gbt___deploy_"></a>
-## gbt       @ deploy-->cvat_setup
-CVAT_HOST=cvat.gilbertbigras.com docker compose -f docker-compose.yml -f docker-compose.gbt.yml -f components/serverless/docker-compose.serverless.yml up -d
-
-<a id="volumes___gbt_deploy_"></a>
-### volumes       @ gbt/deploy-->cvat_setup
-<a id="cvat_volumes___volumes_gbt_deploy_"></a>
-#### cvat_volumes       @ volumes/gbt/deploy-->cvat_setup
+<a id="gbt___debu_g_"></a>
+## gbt       @ debug-->cvat_setup
+<a id="volumes___gbt_debu_g_"></a>
+### volumes       @ gbt/debug-->cvat_setup
+<a id="cvat_volumes___volumes_gbt_debu_g_"></a>
+#### cvat_volumes       @ volumes/gbt/debug-->cvat_setup
 https://github.com/cvat-ai/cvat/issues/5463#issuecomment-1351259923
 docker inspect cvat_cvat_data
 docker inspect cvat_cvat_db
@@ -234,8 +252,8 @@ volumes:
 ```
 
 
-<a id="cli___gbt_deploy_"></a>
-### cli       @ gbt/deploy-->cvat_setup
+<a id="cli___gbt_debu_g_"></a>
+### cli       @ gbt/debug-->cvat_setup
 docker compose -f docker-compose.yml up -d
 
 http://localhost:8080/
@@ -250,15 +268,15 @@ CVAT_HOST=cvat.gilbertbigras.com sudo -E docker compose up -d
 
 docker compose down
 
-<a id="https___gbt_deploy_"></a>
-### https       @ gbt/deploy-->cvat_setup
+<a id="https___gbt_debu_g_"></a>
+### https       @ gbt/debug-->cvat_setup
 https://docs.cvat.ai/docs/administration/community/basics/installation/#deploy-secure-cvat-instance-with-https
 
 `this seems to be only meant for using the https server provided by Let’s Encrypt`
 CVAT_HOST=cvat.gilbertbigras.com docker compose -f docker-compose.yml -f docker-compose.https.yml up -d
 
-<a id="issues___https_gbt_deploy_"></a>
-#### issues       @ https/gbt/deploy-->cvat_setup
+<a id="issues___https_gbt_debu_g_"></a>
+#### issues       @ https/gbt/debug-->cvat_setup
 `Origin checking failed`
 `CSRF_TRUSTED_ORIGINS`
 
@@ -295,211 +313,6 @@ services:
 docker compose -f docker-compose.yml -f docker-compose.settings_overlay.local.yml up -d
 docker compose down
 
-<a id="down___deploy_"></a>
-## down       @ deploy-->cvat_setup
-docker compose down
-
-`Network cvat_cvat Resource is still in use ` 
-docker network inspect cvat_cvat
-
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-detectron2-retinanet-r101
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-facebookresearch-sam-vit-h
-docker network disconnect -f cvat_cvat nuclio-nuclio-openvino-omz-public-mask-rcnn-inception-resnet-v2-atrous-coco
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-shiyinzhang-iog
-
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanSeg
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-stardist
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellpose
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-sam
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-hipt
-docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-virchow
-
-docker network disconnect -f cvat_cvat nuclio
-
-<a id="nuclio_wrapper___down_deplo_y_"></a>
-### nuclio_wrapper       @ down/deploy-->cvat_setup
-ps -p 2268310 -o pid,vsz=MEMORY -o user,group=GROUP -o comm,args=ARGS
-
-<a id="functions___deploy_"></a>
-## functions       @ deploy-->cvat_setup
-chmod +x ./serverless/deploy_cpu.sh
-chmod +x ./serverless/deploy_gpu.sh
-
-nuctl get function --platform local
-
-nuctl delete function pth-instanSeg --platform local --force
-nuctl delete function pth-stardist --platform local --force
-nuctl delete function pth-cellpose --platform local --force
-nuctl delete function pth-cellvit-sam --platform local --force
-nuctl delete function pth-cellvit-hipt --platform local --force
-nuctl delete function pth-cellvit-virchow --platform local --force
-
-nuctl delete function pth-microsam --platform local --force
-
-nuctl delete function pth-facebookresearch-sam-vit-h --platform local --force
-nuctl delete function pth-facebookresearch-detectron2-retinanet-r101 --platform local
-
-<a id="microsam___functions_deploy_"></a>
-### microsam       @ functions/deploy-->cvat_setup
-docker system prune -a
-
-sudo chown -R abhineet: /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5343
-watch sudo cat /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5343/fs/opt/nuclio/microsam/nuctl_outputs.log
-sudo ls /data/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5283/fs/opt/nuclio/microsam/nuctl_outputs.log
-
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam
-docker logs nuclio-nuclio-pth-microsam -f
-nuctl delete function pth-microsam --platform local --force
-
-docker exec -it nuclio-nuclio-pth-microsam /bin/bash
-ssh-keygen -q -t rsa -N '' -C "microsam" -f /root/.ssh/id_rsa
-cat /root/.ssh/id_rsa.pub
-apt update && apt install ssh nano
-nano /root/.ssh/config
-ssh -R 5679:localhost:5679 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x99
-
-<a id="hp___microsam_functions_deplo_y_"></a>
-#### hp       @ microsam/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_huge
-docker logs nuclio-nuclio-pth-microsam_hp_huge -f
-nuctl delete function pth-microsam_hp_huge --platform local --force
-
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_hp_base
-docker logs nuclio-nuclio-pth-microsam_hp_base -f
-nuctl delete function pth-microsam_hp_base --platform local --force
-
-<a id="lm___microsam_functions_deplo_y_"></a>
-#### lm       @ microsam/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_lm_large
-docker logs nuclio-nuclio-pth-microsam_lm_large -f
-nuctl delete function pth-microsam_lm_large --platform local --force
-
-<a id="mi___microsam_functions_deplo_y_"></a>
-#### mi       @ microsam/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_mi_base
-docker logs nuclio-nuclio-pth-microsam_mi_base -f
-nuctl delete function pth-microsam_mi_base --platform local --force
-
-
-
-<a id="dbg___microsam_functions_deplo_y_"></a>
-#### dbg       @ microsam/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam_dummy
-
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam311
-./serverless/deploy_gpu.sh serverless/pytorch/microsam microsam310
-
-nuctl delete function pth-microsam310 --platform local --force
-nuctl delete function pth-microsam311 --platform local --force
-
-<a id="instanseg___functions_deploy_"></a>
-### instanseg       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/instanseg instanseg
-docker logs nuclio-nuclio-pth-instanSeg -f
-<a id="debug___instanseg_functions_deploy_"></a>
-#### debug       @ instanseg/functions/deploy-->cvat_setup
-docker exec -it nuclio-nuclio-pth-instanSeg /bin/bash
-cat /root/.ssh/id_rsa.pub
-ssh -R 5678:localhost:5678 x99
-
-<a id="stardist___functions_deploy_"></a>
-### stardist       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/stardist stardist
-docker logs nuclio-nuclio-pth-stardist -f
-
-<a id="cellpose___functions_deploy_"></a>
-### cellpose       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/cellpose cellpose
-docker logs nuclio-nuclio-pth-cellpose -f
-
-<a id="cellvit___functions_deploy_"></a>
-### cellvit       @ functions/deploy-->cvat_setup
-<a id="sam___cellvit_functions_deploy_"></a>
-#### sam       @ cellvit/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/cellvit cellvit
-docker logs nuclio-nuclio-pth-cellvit-sam -f
-
-<a id="hipt___cellvit_functions_deploy_"></a>
-#### hipt       @ cellvit/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/cellvit cellvit-hipt
-docker logs nuclio-nuclio-pth-cellvit-hipt -f
-
-<a id="virchow___cellvit_functions_deploy_"></a>
-#### virchow       @ cellvit/functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/cellvit cellvit-virchow
-docker logs nuclio-nuclio-pth-cellvit-virchow -f
-
-<a id="openvino___functions_deploy_"></a>
-### openvino       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/openvino/dextr
-./serverless/deploy_gpu.sh serverless/openvino/omz/public/yolo-v3-tf
-
-./serverless/deploy_cpu.sh serverless/openvino/dextrpublic
-./serverless/deploy_cpu.sh serverless/openvino/omz//yolo-v3-tf
-./serverless/deploy_cpu.sh serverless/openvino/omz/public/mask_rcnn_inception_resnet_v2_atrous_coco
-
-<a id="iog___functions_deploy_"></a>
-### iog       @ functions/deploy-->cvat_setup
-./serverless/deploy_cpu.sh serverless/pytorch/shiyinzhang/iog
-<a id="sam___functions_deploy_"></a>
-### sam       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/facebookresearch/sam
-<a id="retinanet_r101___functions_deploy_"></a>
-### retinanet_r101       @ functions/deploy-->cvat_setup
-./serverless/deploy_gpu.sh serverless/pytorch/facebookresearch/detectron2/retinanet_r101
-
-<a id="manage___functions_deploy_"></a>
-### manage       @ functions/deploy-->cvat_setup
-nuctl get function --platform local
-
-nuctl delete function pth-instanSeg --platform local
-nuctl delete function pth-cellvit --platform local --force
-nuctl delete function pth-stardist --platform local --force
-
-nuctl deploy --project-name cvat --path "serverless/pytorch/instanseg/nuclio" \
-    --file "serverless/pytorch/instanseg/nuclio/function-gpu.yaml" --platform local \
-    --env CVAT_FUNCTIONS_REDIS_HOST=cvat_redis_ondisk \
-    --env CVAT_FUNCTIONS_REDIS_PORT=6666 \
-    --platform-config '{"attributes": {"network": "cvat_cvat"}}'
-
-nuctl deploy --project-name cvat \
-  --path serverless/tensorflow/matterport/mask_rcnn/nuclio \
-  --platform local --base-image tensorflow/tensorflow:1.15.5-gpu-py3 \
-  --desc "GPU based implementation of Mask RCNN on Python 3, Keras, and TensorFlow." \
-  --image cvat/tf.matterport.mask_rcnn_gpu \
-  --triggers '{"myHttpTrigger": {"maxWorkers": 1}}' \
-  --resource-limit nvidia.com/gpu=1
-
-<a id="debug___functions_deploy_"></a>
-### debug       @ functions/deploy-->cvat_setup
-docker logs cvat_server -f
-docker logs nuclio -f
-
-docker logs nuclio-nuclio-pth-instanSeg -f
-docker logs nuclio-nuclio-pth-cellvit -f
-docker logs nuclio-nuclio-pth-cellpose -f
-docker logs nuclio-nuclio-pth-stardist -f
-
-docker logs nuclio-nuclio-pth-microsam -f
-
-`Error: Could not get models from the server`
-`ERROR django.request: Internal Server Error: /api/lambda/functions`
-`json.decoder.JSONDecodeError: Expecting value: line 3 column 1 (char 52)`
-https://github.com/cvat-ai/cvat/issues/6346#issuecomment-1600484678
-fix errors in nuclio functions.yaml files
-
-`OPAHealthCheck Internal Server Error for url: http://opa:8181/health?bundles`
-https://github.com/cvat-ai/cvat/issues/8451#issuecomment-2375267178
-doesn't seem to prevent cvat from running normally
-
-<a id="vscode___debug_functions_deploy_"></a>
-#### vscode       @ debug/functions/deploy-->cvat_setup
-https://docs.cvat.ai/docs/guides/serverless-tutorial/#debugging-a-serverless-function
-
-docker exec -it nuclio-nuclio-pth-microsam /bin/bash
-cat /root/.ssh/id_rsa.pub
-
-
 <a id="dat_a_"></a>
 # data
 https://github.com/cvat-ai/cvat/issues/4675#issuecomment-1148547464
@@ -512,7 +325,6 @@ raw images for a project
 
 <a id="mov_e_"></a>
 # move
-
 <a id="docker___move_"></a>
 ## docker       @ move-->cvat_setup
 https://stackoverflow.com/questions/59345566/move-docker-volume-to-different-partition
@@ -531,9 +343,11 @@ sudo nano /etc/docker/daemon.json
 ```
 "data-root": "/home/NVME-8TB/docker",
 ```
+
 ```
 "data-root": "/data/docker",
 ```
+
 ```
 {
     "data-root": "/data/docker",
