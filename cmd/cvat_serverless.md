@@ -112,6 +112,8 @@ nuctl get function --platform local
 ./serverless/deploy_gpu.sh serverless/pytorch/cellpose cellpose
 docker logs nuclio-nuclio-pth-cellpose -f
 
+docker exec -it nuclio-nuclio-pth-cellpose /bin/bash
+
 nuctl delete function pth-cellpose --platform local --force
 docker system prune -a
 
