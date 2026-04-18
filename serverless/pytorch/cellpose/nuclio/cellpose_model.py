@@ -30,7 +30,7 @@ def to_cvat_mask(box: list, mask):
 
 class CellPoseModel:
     def __init__(self):
-        
+
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         pretrained_model = "cpsam"
         # pixel_size = 0.2632
@@ -46,7 +46,7 @@ class CellPoseModel:
         image_np = np.array(image)
         flow_threshold = 0
         tile_norm_blocksize = 0
-        cellprob_threshold = -10 * threshold
+        cellprob_threshold = -10 * threshold if threshold > 0 else -0.1
 
         context.logger.info(f"cellprob_threshold: {cellprob_threshold}")
 
