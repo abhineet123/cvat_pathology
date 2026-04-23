@@ -239,7 +239,7 @@ def main():
                     for chunk_id, image_paths_chunk in enumerate(image_paths_chunks):
                         n_chunk_images = len(image_paths_chunk)
                         task_spec = {
-                            "name": f"{task_name}-{chunk_id}",
+                            "name": f"{task_name}-chunk_{chunk_id+1:02d}",
                             "project_id": project_id,
                         }
                         print(

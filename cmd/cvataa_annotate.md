@@ -39,6 +39,7 @@
         - [load       @ cellvit/TNBC-D10](#load___cellvit_tnbc_d10_)
     - [ensemble       @ TNBC-D10](#ensemble___tnbc_d10_)
     - [multi       @ TNBC-D10](#multi___tnbc_d10_)
+        - [ensemble       @ multi/TNBC-D10](#ensemble___multi_tnbc_d10_)
 - [TNBC-HandE       @ annotate_tasks](#tnbc_hande___annotate_tasks_)
     - [stardist       @ TNBC-HandE](#stardist___tnbc_hande_)
     - [instanseg       @ TNBC-HandE](#instanseg___tnbc_hande_)
@@ -233,8 +234,9 @@ python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=1024 models=cel
 
 <a id="ensemble___tnbc_d10_"></a>
 ## ensemble       @ TNBC-D10-->cvataa_annotate
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1
+python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC,D10 iany=256 eall=HandE @ensemble sfx=1 
+
+python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC,D10 iany=512 eall=HandE @ensemble sfx=1 
 
 <a id="multi___tnbc_d10_"></a>
 ## multi       @ TNBC-D10-->cvataa_annotate
@@ -242,6 +244,11 @@ python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=instanseg multi=1
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellpose multi=1
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit multi=1
+
+<a id="ensemble___multi_tnbc_d10_"></a>
+### ensemble       @ multi/TNBC-D10-->cvataa_annotate
+python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC,D10 iany=256 eall=HandE @ensemble sfx=1 multi=1
+
 
 
 <a id="tnbc_hande___annotate_tasks_"></a>

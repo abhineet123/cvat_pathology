@@ -11,6 +11,13 @@ import cvat_sdk.auto_annotation as cvataa
 import cvat_sdk.models as models
 
 
+class EnsembleParams:
+    def __init__(self):
+        self.sfx = ""
+        self.nms_thresh = 0.3
+        self.multi = 1
+
+
 class Filter:
     def __init__(self):
         self.iall = []
@@ -386,8 +393,7 @@ def find_matching_obj_pairs(
                     obj1["to_delete"] = 1
 
 
-def get_cvat_annotations(task_name, task_name_to_id, client):
-    task_id = task_name_to_id[task_name]
+def get_cvat_annotations(client, task_id):
 
     # print(f"{model_str}: retrieve task")
     task = client.tasks.retrieve(task_id)

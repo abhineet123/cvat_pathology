@@ -12,6 +12,7 @@ import cvat_sdk.auto_annotation as cvataa
 # from cvat_sdk.core import progress
 
 from cell_seg_utils import (
+    EnsembleParams,
     CVATAuth,
     Filter,
     LoadAnnotations,
@@ -32,11 +33,10 @@ class Params(paramparse.CFG):
         self.load = ""
         self.load_root = "/data/PDL1-2026-Tiles/vis"
         self.mask_dir_name = "masks-cellvit"
-        self.multi = 1
+        self.multi = 0
         self.reset = 1
 
-        self.ensemble = ""
-        self.nms_thresh = 0.3
+        self.ensemble = EnsembleParams()
 
 
 def main():
@@ -71,17 +71,18 @@ def main():
         for model_id, model in enumerate(params.models):
             if params.load:
                 Model = functools.partial(LoadAnnotations, load_dir=params.load[model_id])
-            elif params.ensemble:
+            elif params.ensemble.sfx:
                 from cvataa.ensemble_cli import EnsembleCLI
 
                 Model = EnsembleCLI
 
-                model = f"ensemble" if params.ensemble == "1" else f"ensemble_{params.ensemble}"
+                sfx = params.ensemble.sfx
+                model = f"ensemble" if sfx == "1" else f"ensemble_{sfx}"
                 Model = functools.partial(
                     EnsembleCLI,
+                    params=params.ensemble,
                     models=params.models,
                     name=model,
-                    nms_thresh=params.nms_thresh,
                     client=client,
                     task_name_to_obj=task_name_to_obj,
                 )
@@ -181,7 +182,7 @@ def main():
                     task_name=task_name,
                     n_frames=n_frames,
                     frame_name_to_shapes=frame_name_to_shapes,
-                    label_name=model,
+                    label_name=model if params.multi else "nucleus",
                     verbose=False,
                 )
                 print(f"\nannotating task {i+1} / {n_tasks}: {task_name}\n")

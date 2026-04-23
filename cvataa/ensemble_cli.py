@@ -3,17 +3,26 @@ import os
 import pickle
 import numpy as np
 from tqdm import tqdm
+from collections import defaultdict
+
 
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 from cvat_sdk import masks
 
-from cell_seg_utils import CellSegCLIBase, perform_nms, linux_path, get_cvat_annotations
+from cell_seg_utils import (
+    EnsembleParams,
+    CellSegCLIBase,
+    perform_nms,
+    linux_path,
+    get_cvat_annotations,
+)
 
 
 class EnsembleCLI(CellSegCLIBase):
     def __init__(
         self,
+        params: EnsembleParams,
         models: list,
         name: str,
         client,
@@ -21,7 +30,6 @@ class EnsembleCLI(CellSegCLIBase):
         label_name: str,
         task_name_to_obj: dict,
         n_frames: int,
-        nms_thresh: float,
         verbose=True,
         **kwargs,
     ) -> None:
@@ -29,36 +37,83 @@ class EnsembleCLI(CellSegCLIBase):
 
         self.models = models
         self.name = name
-        self.nms_thresh = nms_thresh
+        self.params = params
+
+        self.multi = params.multi
+        self.nms_thresh = params.nms_thresh
+
         self.client = client
         self.task_name_to_obj = task_name_to_obj
 
-        self.model_task_names = [task_name.replace(name, model) for model in self.models]
-
-        self.task_name_to_id = {
-            task_name: task_name_to_obj[task_name]["_model"]["id"]
-            for task_name in self.model_task_names
-        }
-
         models_str = "_".join(self.models)
         cache_dir = linux_path(".cache", f"{task_name}-{models_str}")
-        if os.path.exists(cache_dir):
+        if self.multi:
+            cache_dir = f"{cache_dir}-multi"
+
+        model_to_shapes_pkl = linux_path(cache_dir, "model_to_shapes.pkl")
+        model_to_frame_info_pkl = linux_path(cache_dir, "model_to_frame_info.pkl")
+
+        if (
+            os.path.exists(cache_dir)
+            and os.path.isfile(model_to_shapes_pkl)
+            and os.path.isfile(model_to_frame_info_pkl)
+        ):
             print(f"loading annotations from cache: {cache_dir}")
-            with open(linux_path(cache_dir, "model_to_shapes.pkl"), "rb") as f:
+            with open(model_to_shapes_pkl, "rb") as f:
                 self.model_to_shapes = pickle.load(f)
-            with open(linux_path(cache_dir, "model_to_frame_info.pkl"), "rb") as f:
+            with open(model_to_frame_info_pkl, "rb") as f:
                 self.model_to_frame_info = pickle.load(f)
         else:
-            os.makedirs(cache_dir, exist_ok=False)
-            self.load_annotations()
+            os.makedirs(cache_dir, exist_ok=True)
+            if self.multi:
+                self.load_annotations_multi()
+            else:
+                self.load_annotations()
 
             print(f"saving annotations to cache: {cache_dir}")
-            with open(linux_path(cache_dir, "model_to_shapes.pkl"), "wb") as f:
+            with open(model_to_shapes_pkl, "wb") as f:
                 pickle.dump(self.model_to_shapes, f)
-            with open(linux_path(cache_dir, "model_to_frame_info.pkl"), "wb") as f:
+            with open(model_to_frame_info_pkl, "wb") as f:
                 pickle.dump(self.model_to_frame_info, f)
 
+    def load_annotations_multi(self):
+
+        projects_dict = [project.__dict__ for project in self.client.projects.list()]
+        project_id_to_dict = {
+            project["_model"]["id"]: project["_model"] for project in projects_dict
+        }
+
+        task_name = self.task_name.replace(self.name, "multi")
+        task_dict = self.task_name_to_obj[task_name]["_model"]
+        task_id = task_dict["id"]
+        project_id = task_dict["project_id"]
+        project_dict = project_id_to_dict[project_id]
+
+        task = self.client.tasks.retrieve(task_id)
+        labels = task.get_labels()
+        label_id_to_name = {label["id"]: label["name"] for label in labels}
+
+        print(f"\nget_cvat_annotations: {task_name}")
+        frame_name_to_shapes, frame_name_to_info = get_cvat_annotations(
+            self.client,
+            task_id,
+        )
+
+        self.model_to_shapes = {model: defaultdict(list) for model in self.models}
+        self.model_to_frame_info = {model: frame_name_to_info for model in self.models}
+        for frame_name, shapes in frame_name_to_shapes.items():
+            for shape in shapes:
+                label_id = shape["label_id"]
+                model = label_id_to_name[label_id]
+                self.model_to_shapes[model][frame_name].append(shape)
+
     def load_annotations(self):
+        self.model_task_names = [task_name.replace(self.name, model) for model in self.models]
+
+        self.model_task_ids = [
+            self.task_name_to_obj[task_name]["_model"]["id"] for task_name in self.model_task_names
+        ]
+
         self.model_to_shapes = {}
         self.model_to_frame_info = {}
 
@@ -66,16 +121,14 @@ class EnsembleCLI(CellSegCLIBase):
 
         print("\n\nloading annotations from CVAT...")
 
-        for model_id, (model, task_name) in enumerate(
-            zip(self.models, self.model_task_names, strict=True)
+        for model_id, (model, task_name, task_id) in enumerate(
+            zip(self.models, self.model_task_names, self.model_task_ids, strict=True)
         ):
             model_str = f"model {model_id+1} / {n_models} {model}: {task_name}"
 
-            frame_name_to_shapes, frame_name_to_info = get_cvat_annotations(
-                task_name, self.task_name_to_id, self.client
-            )
-
             print(f"\n{model_str}")
+
+            frame_name_to_shapes, frame_name_to_info = get_cvat_annotations(self.client, task_id)
 
             self.model_to_shapes[model] = frame_name_to_shapes
             self.model_to_frame_info[model] = frame_name_to_info

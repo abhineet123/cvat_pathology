@@ -83,7 +83,7 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Til
 
 <a id="multi___256_tnbc_"></a>
 ### multi       @ 256/TNBC-->cvataa_create
-python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1 max_images=1000
 
 
 <a id="512___tnbc_"></a>

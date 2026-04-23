@@ -96,7 +96,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1",
+			"args": "python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC,D10 iany=256 eall=HandE @ensemble sfx=1 multi=1",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
