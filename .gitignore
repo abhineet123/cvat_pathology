@@ -8,6 +8,7 @@
 /logs
 /profiles
 
+.vscode/
 .cache/
 .gitp/
 .gitb/
