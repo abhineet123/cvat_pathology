@@ -37,12 +37,14 @@
     - [cellpose       @ TNBC-D10](#cellpose___tnbc_d10_)
     - [cellvit       @ TNBC-D10](#cellvit___tnbc_d10_)
         - [load       @ cellvit/TNBC-D10](#load___cellvit_tnbc_d10_)
+    - [ensemble       @ TNBC-D10](#ensemble___tnbc_d10_)
+    - [multi       @ TNBC-D10](#multi___tnbc_d10_)
 - [TNBC-HandE       @ annotate_tasks](#tnbc_hande___annotate_tasks_)
     - [stardist       @ TNBC-HandE](#stardist___tnbc_hande_)
     - [instanseg       @ TNBC-HandE](#instanseg___tnbc_hande_)
     - [cellpose       @ TNBC-HandE](#cellpose___tnbc_hande_)
-    - [microsam       @ TNBC-HandE](#microsam___tnbc_hande_)
     - [cellvit       @ TNBC-HandE](#cellvit___tnbc_hande_)
+    - [microsam       @ TNBC-HandE](#microsam___tnbc_hande_)
 
 <!-- /MarkdownTOC -->
 
@@ -194,25 +196,25 @@ python cvataa/annotate_tasks.py filter.iall=TNBC filter.iany=512 models=cellpose
 # TNBC-D10       @ annotate_tasks-->cvat_auto
 <a id="stardist___tnbc_d10_"></a>
 ## stardist       @ TNBC-D10-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=256 models=stardist
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=512 models=stardist
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=1024 models=stardist
 <a id="instanseg___tnbc_d10_"></a>
 ## instanseg       @ TNBC-D10-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=256 models=instanseg
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=512 models=instanseg
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=1024 models=instanseg
-
 <a id="cellpose___tnbc_d10_"></a>
 ## cellpose       @ TNBC-D10-->cvataa_annotate
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=256 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=1024 models=cellpose
-
 <a id="cellvit___tnbc_d10_"></a>
 ## cellvit       @ TNBC-D10-->cvataa_annotate
 `IHC and HandE`
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 models=cellvit
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 models=cellvit
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=1024 models=cellvit
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 filter.eall=HandE models=cellvit
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=1024 filter.eall=HandE models=cellvit
 
 <a id="load___cellvit_tnbc_d10_"></a>
 ### load       @ cellvit/TNBC-D10-->cvataa_annotate
@@ -228,6 +230,19 @@ python cvataa/create_tiles.py root_dir=/data/PDL1-2026-Tiles mask_path=vis/PDL1-
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=1024 models=cellvit_512 load=PDL1-2026-TNBC-512-cellvit-D10-260322_170800/masks-cellvit
 
 /data/PDL1-2026-Tiles/vis/PDL1-2026-TNBC-512-cellvit-D10-260322_171011/masks-cellvit-1024
+
+<a id="ensemble___tnbc_d10_"></a>
+## ensemble       @ TNBC-D10-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1
+
+<a id="multi___tnbc_d10_"></a>
+## multi       @ TNBC-D10-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=stardist multi=1
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=instanseg multi=1
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellpose multi=1
+python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit multi=1
+
 
 <a id="tnbc_hande___annotate_tasks_"></a>
 # TNBC-HandE       @ annotate_tasks-->cvat_auto
@@ -249,13 +264,12 @@ python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=256 models=ce
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=1024 models=cellpose
 
-<a id="microsam___tnbc_hande_"></a>
-## microsam       @ TNBC-HandE-->cvataa_annotate
-python cvataa/annotate_tasks.py filter.iall=TNBC-HandE,D10 filter.iany=512 models=microsam
-
-
 <a id="cellvit___tnbc_hande_"></a>
 ## cellvit       @ TNBC-HandE-->cvataa_annotate
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=256 models=cellvit
 python cvataa/annotate_tasks.py filter.iall=TNBC-HandE filter.iany=1024 models=cellvit
+
+<a id="microsam___tnbc_hande_"></a>
+## microsam       @ TNBC-HandE-->cvataa_annotate
+python cvataa/annotate_tasks.py filter.iall=TNBC-HandE,D10 filter.iany=512 models=microsam
 

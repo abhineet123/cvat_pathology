@@ -58,6 +58,7 @@ class Params(paramparse.CFG):
             "#00ff00",
             "#0000ff",
             "#f1a66d",
+            "#f1a66d",
         ]
 
 

@@ -14,6 +14,8 @@
     - [512       @ UpperGI](#512___upperg_i_)
 - [TNBC       @ create_tasks](#tnbc___create_tasks_)
     - [256       @ TNBC](#256___tnbc_)
+        - [ensemble       @ 256/TNBC](#ensemble___256_tnbc_)
+        - [multi       @ 256/TNBC](#multi___256_tnbc_)
     - [512       @ TNBC](#512___tnbc_)
     - [1024       @ TNBC](#1024___tnbc_)
 - [TNBC-HandE       @ create_tasks](#tnbc_hande___create_tasks_)
@@ -63,13 +65,26 @@ python cvataa/create_tasks.py project_name=PDL1-2026-NSCLC-512 directory=NSCLC-T
 ## 512       @ UpperGI-->cvataa_create
 python cvataa/create_tasks.py project_name=PDL1-2026-UpperGI-512 directory=UpperGI-Tiles model_suffixes=instanseg,stardist,cellpose,cellvit
 
+
+
 <a id="tnbc___create_tasks_"></a>
 # TNBC       @ create_tasks-->cvataa_create
 <a id="256___tnbc_"></a>
 ## 256       @ TNBC-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit,ensemble
+
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose max_images=500
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=cellvit max_images=500 filter.iall=D10
+
+<a id="ensemble___256_tnbc_"></a>
+### ensemble       @ 256/TNBC-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=ensemble
+
+<a id="multi___256_tnbc_"></a>
+### multi       @ 256/TNBC-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1
+
 
 <a id="512___tnbc_"></a>
 ## 512       @ TNBC-->cvataa_create
@@ -78,6 +93,8 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Til
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=cellvit filter.iall=D10
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=microsam filter.iall=D10
+
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=ensemble filter.iall=D10
 
 <a id="1024___tnbc_"></a>
 ## 1024       @ TNBC-->cvataa_create

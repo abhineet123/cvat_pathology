@@ -15,8 +15,8 @@ from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
 
 
 class CellposeCLI(CellSegCLIBase):
-    def __init__(self, task_name, n_frames, verbose=True, **kwargs) -> None:
-        CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "Cellpose")
+    def __init__(self, task_name, label_name, n_frames, verbose=True, **kwargs) -> None:
+        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "Cellpose")
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         pretrained_model = "cpsam"

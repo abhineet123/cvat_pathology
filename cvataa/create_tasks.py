@@ -24,6 +24,7 @@ class Params(paramparse.CFG):
         self.root_dir = "/data/PDL1-2026-Tiles"
         self.directory = ""
         self.recursive = 0
+        self.multi = 0
 
         self.project_name = ""
 
@@ -34,23 +35,40 @@ class Params(paramparse.CFG):
         # self.model_suffix = "instanseg"
         # self.model_suffix = "ensemble"
 
+        self.label_cols = [
+            "#ff0000",
+            "#00ff00",
+            "#0000ff",
+            "#f1a66d",
+            "#e12AFB",
+            "#00ffff",
+        ]
+
 
 def linux_path(*args, **kwargs):
     return os.path.join(*args, **kwargs).replace(os.sep, "/")
 
 
-def create_project_lla(cfg_dict, name):
+def create_project_lla(cfg_dict, name, label_names, label_cols):
+    if label_names is None:
+        label_names = [
+            "nucleus",
+        ]
+
+    assert len(label_cols) >= len(label_names), "Insufficient number of label_cols"
+
     configuration = Configuration(**cfg_dict)
     with ApiClient(configuration) as api_client:
         project_write_request = models.ProjectWriteRequest(
             name=name,
             labels=[
                 models.PatchedLabelRequest(
-                    id=1,
-                    name="nucleus",
-                    color="#fafa37",
+                    id=label_id + 1,
+                    name=label_name,
+                    color=label_cols[label_id],
                     type="any",
-                ),
+                )
+                for label_id, label_name in enumerate((label_names))
             ],
         )
         try:
@@ -137,22 +155,38 @@ def main():
 
     client_cfg = params.auth.to_cfg()
 
+    project_suffixes = (
+        params.model_suffixes
+        if not params.multi
+        else [
+            "multi",
+        ]
+    )
+
     with make_client(**client_cfg) as client:
-        for model_suffix in params.model_suffixes:
+
+        for project_suffix in project_suffixes:
             project_name = f"{params.project_name}"
-            if model_suffix:
-                project_name = f"{project_name}-{model_suffix}"
+            if project_suffix:
+                project_name = f"{project_name}-{project_suffix}"
+
             projects_dict, project_name_to_id, project_name_to_dict = get_projects(client)
 
             tasks_dict = [task.__dict__ for task in client.tasks.list()]
             task_name_to_id = {task["_model"]["name"]: task["_model"]["id"] for task in tasks_dict}
 
             if project_name not in project_name_to_id:
-                # raise AssertionError(f"invalid project_name: {project_name}")
+                # raise AssertionError(f"Nonexistent project: {project_name}")
                 timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
                 print(f"{timestamp} creating project: {project_name}")
 
-                project_dict = create_project_lla(client_cfg, project_name)
+                project_dict = create_project_lla(
+                    client_cfg,
+                    project_name,
+                    label_names=params.model_suffixes if params.multi else None,
+                    label_cols=params.label_cols,
+                )
+
                 project_id = project_dict["id"]
 
                 projects_dict, project_name_to_id, project_name_to_dict = get_projects(client)
@@ -173,9 +207,6 @@ def main():
             for subdir_id, subdir in enumerate(subdirs):
                 task_name = os.path.relpath(subdir, dir_path)
                 task_name = f"{project_name}-{task_name}"
-
-                # if model_suffix:
-                # task_name = f"{task_name}-{model_suffix}"
 
                 if task_name in task_name_to_id:
                     print(f"{subdir_id+1} / {n_subdirs} skipping existing task: {task_name}")

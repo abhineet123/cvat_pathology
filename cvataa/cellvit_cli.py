@@ -1,7 +1,3 @@
-def linux_path(*args, **kwargs):
-    return os.path.join(*args, **kwargs).replace(os.sep, "/")
-
-
 # from typing import List
 # from tqdm import tqdm
 import PIL.Image
@@ -23,12 +19,14 @@ import sys
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 
-from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
+from cell_seg_utils import linux_path, instance_mask_to_cells, CellSegCLIBase
 
 
 class CellvitCLI(CellSegCLIBase):
-    def __init__(self, task_name, n_frames, model_type="sam", verbose=True, **kwargs) -> None:
-        CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "CellVIT")
+    def __init__(
+        self, task_name, label_name, n_frames, model_type="sam", verbose=True, **kwargs
+    ) -> None:
+        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "CellVIT")
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 

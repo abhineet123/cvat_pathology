@@ -35,9 +35,12 @@ cd cvat-sdk/cvat_sdk/auto_annotation/functions
 <a id="issues___instal_l_"></a>
 ## issues       @ install-->cvataa_setup
 `opencv imshow hangs up`
-probably some sort of conflict between pencv-python and pencv-python-headless
-go to site-packages and remove cv2 and opencv-python folders if pip uninstall does not work
-
+seems to be some sort of conflict between opencv-python and opencv-python-headless
+```
+pip uninstall opencv-python-headless
+pip uninstall opencv-python
+```
+go to `site-packages` and remove cv2 and opencv-python folders if pip uninstall does not work
 
 <a id="fiftyone___instal_l_"></a>
 ## fiftyone       @ install-->cvataa_setup
@@ -50,6 +53,8 @@ python cvataa/visualize_tasks.py delete_mode=1
 <a id="start___fiftyone_install_"></a>
 ### start       @ fiftyone/install-->cvataa_setup
 python cvataa/visualize_tasks.py start_app=2 port=5151 address=0.0.0.0 permanent=1 remote=1
+
+python cvataa/visualize_tasks.py start_app=2 port=5151 remote=1
 python cvataa/visualize_tasks.py start_app=2 port=5152 remote=1
 python cvataa/visualize_tasks.py start_app=2 port=5153 remote=1
 
@@ -63,18 +68,35 @@ mkvirtualenv -p python3.10  instanseg
 git clone https://github.com/abhineet123/instanseg
 cd instanseg
 pip install -e ".[full]"
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+pip install numpy==1.26.4
+pip install opencv-python==4.8.0.76
+
+pip install cvat-cli paramparse
 
 <a id="stardist___instal_l_"></a>
 ## stardist       @ install-->cvataa_setup
 mkvirtualenv -p python3.10  stardist
-pip install tensorflow
+
+https://www.tensorflow.org/install/source#tested_build_configurations
+pip install tensorflow==2.15.0
+
 pip install stardist
+pip install cvat-cli paramparse
+pip install opencv-python==4.8.0.76
+pip install numpy==1.26.4
+
+```arrayprint.py", line 1599, in _array_str_implementation
+TypeError: '<=' not supported between instances of 'str' and 'int'
+```
+remove `np.set_printoptions(legacy="1.25")`
 
 <a id="cellpose___instal_l_"></a>
 ## cellpose       @ install-->cvataa_setup
 mkvirtualenv -p python3.10  cellpose
 python -m pip install scikit-image numpy==1.26.4
 python -m pip install cellpose
+pip install cvat-cli paramparse opencv-python
 
 <a id="microsam___instal_l_"></a>
 ## microsam       @ install-->cvataa_setup
@@ -101,12 +123,11 @@ conda uninstall opencv-python-headless
 
 <a id="venv___microsam_install_"></a>
 ### venv       @ microsam/install-->cvataa_setup
+`doesn't work because of conda-specific nifty`
 mkvirtualenv -p python3.12  microsam_pip
 pip install -r requirements.txt
 
-
 pip uninstall nifty
-
 pip install nifty>=1.2.3
 pip install imagecodecs
 pip install magicgui

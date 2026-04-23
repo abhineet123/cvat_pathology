@@ -7,6 +7,7 @@
     - [mi       @ microsam/functions](#mi___microsam_functions_)
     - [dbg       @ microsam/functions](#dbg___microsam_functions_)
   - [cellpose       @ functions](#cellpose___function_s_)
+    - [interactor       @ cellpose/functions](#interactor___cellpose_functions_)
   - [cellvit       @ functions](#cellvit___function_s_)
     - [sam       @ cellvit/functions](#sam___cellvit_function_s_)
     - [hipt       @ cellvit/functions](#hipt___cellvit_function_s_)
@@ -116,6 +117,12 @@ docker exec -it nuclio-nuclio-pth-cellpose /bin/bash
 
 nuctl delete function pth-cellpose --platform local --force
 docker system prune -a
+
+<a id="interactor___cellpose_functions_"></a>
+### interactor       @ cellpose/functions-->cvat_serverless
+./serverless/deploy_gpu.sh serverless/pytorch/cellpose cellpose_interactor
+docker logs nuclio-nuclio-pth-cellpose_interactor -f
+
 
 <a id="cellvit___function_s_"></a>
 ## cellvit       @ functions-->cvat_serverless

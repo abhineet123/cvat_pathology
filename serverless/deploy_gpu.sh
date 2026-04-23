@@ -26,8 +26,8 @@ do
         --file "$func_config" --platform local \
         --env CVAT_FUNCTIONS_REDIS_HOST=cvat_redis_ondisk \
         --env CVAT_FUNCTIONS_REDIS_PORT=6666 \
-        --verbose \
         --platform-config '{"attributes": {"network": "cvat_cvat"}}'
+        # --verbose \
 done
 
 nuctl get function --platform local

@@ -4,7 +4,6 @@ metadata:
   annotations:
     name: MicroSAM (ViT-Tiny)
     version: 2
-    # type: tracker
     type: interactor
     spec:
     min_pos_points: 0

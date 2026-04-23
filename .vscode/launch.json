@@ -15,17 +15,17 @@
 			"name": "create_tasks recursive",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/create_tasks_from_folders.py",
+			"program": "${workspaceFolder}/cvataa/create_tasks.py",
 			"console": "integratedTerminal",
 			"args": "root_dir=/data/IHC4BC project_name=IHC4BC-HandE directory=HandE model_suffix=instanseg recursive=1"
 		},
 		{
-			"name": "create_tasks gbt",
+			"name": "create_tasks",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/create_tasks_from_folders.py",
+			"program": "${workspaceFolder}/cvataa/create_tasks.py",
 			"console": "integratedTerminal",
-			"args": "cfg=gbt project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffix=instanseg"
+			"args": "python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1"
 		},
 		{
 			"name": "stitch tiles",
@@ -70,7 +70,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=512 models=cellvit",
+			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit multi=1",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -84,6 +84,19 @@
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
 			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 models=microsam",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
+			"name": "annotate tasks ensemble",
+			"python": "/home/abhineet/.virtualenvs/microsam_pip/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=512 filter.eall=HandE models=stardist,instanseg,cellpose,cellvit ensemble=1",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"

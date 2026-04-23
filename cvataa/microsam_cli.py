@@ -32,13 +32,14 @@ class MicroSAMCLI(CellSegCLIBase):
     def __init__(
         self,
         task_name,
+        label_name,
         n_frames,
         frame_name_to_shapes,
         model_type="vit_h_histopathology",
         verbose=True,
         **kwargs,
     ) -> None:
-        CellSegCLIBase.__init__(self, task_name, n_frames, verbose, "MicroSAM")
+        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "MicroSAM")
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.frame_name_to_shapes = frame_name_to_shapes

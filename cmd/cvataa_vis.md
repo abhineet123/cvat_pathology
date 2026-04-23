@@ -21,6 +21,7 @@
 - [TNBC-D10       @ visualize_tasks](#tnbc_d10___visualize_task_s_)
     - [1024       @ TNBC-D10](#1024___tnbc_d10_)
     - [512       @ TNBC-D10](#512___tnbc_d10_)
+        - [ensemble       @ 512/TNBC-D10](#ensemble___512_tnbc_d10_)
     - [256       @ TNBC-D10](#256___tnbc_d10_)
 - [TNBC-HandE-D10       @ visualize_tasks](#tnbc_hande_d10___visualize_task_s_)
     - [local       @ TNBC-HandE-D10](#local___tnbc_hande_d10_)
@@ -112,6 +113,12 @@ python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-1024 directory=TNBC
 python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=stardist,instanseg,cellpose,cellvit filter.iall=D10
 
 python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=stardist,instanseg,cellpose,cellvit filter.iall=D10 grouped=1
+
+<a id="ensemble___512_tnbc_d10_"></a>
+### ensemble       @ 512/TNBC-D10-->cvataa_vis
+python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=cellpose,ensemble filter.iall=D10
+python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=cellpose,ensemble filter.iall=D10
+
 
 <a id="256___tnbc_d10_"></a>
 ## 256       @ TNBC-D10-->cvataa_vis
