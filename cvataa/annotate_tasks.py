@@ -1,3 +1,5 @@
+import os
+import sys
 import numpy as np
 
 # np.set_printoptions(legacy="1.25")
@@ -35,12 +37,16 @@ class Params(paramparse.CFG):
         self.mask_dir_name = "masks-cellvit"
         self.multi = 0
         self.reset = 1
+        self.start_id = 0
 
         self.ensemble = EnsembleParams()
 
 
 def main():
     params: Params = paramparse.process(Params)
+
+    cvat_path = linux_path(os.path.expanduser("~"), "cvat_pathology")
+    sys.path.append(cvat_path)
 
     if params.multi:
         params.reset = 0
@@ -163,6 +169,10 @@ def main():
 
             n_tasks = len(relevant_task_names)
             for i, task_name in enumerate(relevant_task_names):
+                if i < params.start_id:
+                    print(f"\n\nskipping task {i+1} / {n_tasks}: {task_name}")
+                    continue
+                print(f"\n\nannotating task {i+1} / {n_tasks}: {task_name}")
 
                 if params.multi:
                     task_id = task_name_to_id[task_name]
@@ -185,7 +195,6 @@ def main():
                     label_name=model if params.multi else "nucleus",
                     verbose=False,
                 )
-                print(f"\nannotating task {i+1} / {n_tasks}: {task_name}\n")
                 try:
                     cvataa.annotate_task(
                         client,

@@ -8,11 +8,11 @@
     - [instanseg       @ install](#instanseg___instal_l_)
     - [stardist       @ install](#stardist___instal_l_)
     - [cellpose       @ install](#cellpose___instal_l_)
+    - [cellvit       @ install](#cellvit___instal_l_)
+        - [shared       @ cellvit/install](#shared___cellvit_instal_l_)
     - [microsam       @ install](#microsam___instal_l_)
         - [conda       @ microsam/install](#conda___microsam_install_)
         - [venv       @ microsam/install](#venv___microsam_install_)
-    - [cellvit       @ install](#cellvit___instal_l_)
-        - [shared       @ cellvit/install](#shared___cellvit_instal_l_)
     - [issues       @ install](#issues___instal_l__1)
 - [f2gbt       @ install](#f2gbt___instal_l_)
 
@@ -94,9 +94,48 @@ remove `np.set_printoptions(legacy="1.25")`
 <a id="cellpose___instal_l_"></a>
 ## cellpose       @ install-->cvataa_setup
 mkvirtualenv -p python3.10  cellpose
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+git clone https://github.com/abhineet123/cellpose
+cd cellpose
+pip install -r requirements.txt
+python -m pip install -e .
 python -m pip install scikit-image numpy==1.26.4
-python -m pip install cellpose
-pip install cvat-cli paramparse opencv-python
+pip install opencv-python==4.8.0.76
+pip install cvat-cli paramparse
+
+<a id="cellvit___instal_l_"></a>
+## cellvit       @ install-->cvataa_setup
+mkvirtualenv -p python3.10  cellvit
+
+sudo apt install python3.10-dev
+
+git clone https://github.com/abhineet123/cellvit_pp cellvit
+cd cellvit
+
+python -m pip install -r requirements.txt
+
+`not needed`
+pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+
+`requirements file is annoyingly out-of-date and numpy version mismatches are absolutely everywhere`
+
+pip install cupy-cuda12x
+pip install --upgrade timm wandb Numba scipy tensorflow scikit-image pandas torch torchvision torchaudio
+
+pip uninstall opencv-python-headless
+pip install --upgrade opencv-python
+pip uninstall opencv-python
+
+pip install cvat-cli paramparse
+
+
+<a id="shared___cellvit_instal_l_"></a>
+### shared       @ cellvit/install-->cvataa_setup
+`not recommended`
+python -m pip install cellvit
+pip install numpy==2.2.6
+
+
 
 <a id="microsam___instal_l_"></a>
 ## microsam       @ install-->cvataa_setup
@@ -150,33 +189,6 @@ pip install paramparse cvat-cli opencv-python
 `does not work`
 pip install -r requirements-dev.txt
 
-
-<a id="cellvit___instal_l_"></a>
-## cellvit       @ install-->cvataa_setup
-mkvirtualenv -p python3.10  cellvit
-
-sudo apt install python3.10-dev
-pip install cvat-cli paramparse
-
-python -m pip install -r requirements.txt
-
-`not needed`
-pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
-
-`requirements file is annoyingly out-of-date and numpy version mismatches are absolutely everywhere`
-pip install cupy-cuda12x
-
-pip install --upgrade timm wandb Numba scipy tensorflow scikit-image pandas torch torchvision torchaudio
-
-pip uninstall opencv-python-headless
-pip install --upgrade opencv-python
-pip uninstall opencv-python
-
-<a id="shared___cellvit_instal_l_"></a>
-### shared       @ cellvit/install-->cvataa_setup
-`not recommended`
-python -m pip install cellvit
-pip install numpy==2.2.6
 
 <a id="issues___instal_l__1"></a>
 ## issues       @ install-->cvataa_setup

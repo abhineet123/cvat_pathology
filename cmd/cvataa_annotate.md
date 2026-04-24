@@ -31,6 +31,9 @@
     - [stardist       @ TNBC](#stardist___tnbc_)
     - [instanseg       @ TNBC](#instanseg___tnbc_)
     - [cellpose       @ TNBC](#cellpose___tnbc_)
+    - [multi-256       @ TNBC](#multi_256___tnbc_)
+        - [ensemble       @ multi-256/TNBC](#ensemble___multi_256_tnbc_)
+    - [multi-512       @ TNBC](#multi_512___tnbc_)
 - [TNBC-D10       @ annotate_tasks](#tnbc_d10___annotate_tasks_)
     - [stardist       @ TNBC-D10](#stardist___tnbc_d10_)
     - [instanseg       @ TNBC-D10](#instanseg___tnbc_d10_)
@@ -193,6 +196,23 @@ python cvataa/annotate_tasks.py filter.iall=TNBC filter.iany=256 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC filter.iany=512 models=cellpose
 python cvataa/annotate_tasks.py filter.iall=TNBC filter.iany=512 models=cellpose
 
+<a id="multi_256___tnbc_"></a>
+## multi-256       @ TNBC-->cvataa_annotate
+python cvataa/annotate_tasks.py models=stardist multi=1 @filter iall=TNBC iany=256 eall=HandE 
+python cvataa/annotate_tasks.py models=instanseg multi=1 @filter iall=TNBC iany=256 eall=HandE 
+python cvataa/annotate_tasks.py models=cellpose multi=1 @filter iall=TNBC iany=256 eall=HandE 
+python cvataa/annotate_tasks.py models=cellvit multi=1 @filter iall=TNBC iany=256 eall=HandE 
+<a id="ensemble___multi_256_tnbc_"></a>
+### ensemble       @ multi-256/TNBC-->cvataa_annotate
+python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC iany=256 eall=HandE @ensemble sfx=1 multi=1 @ start_id=63
+
+<a id="multi_512___tnbc_"></a>
+## multi-512       @ TNBC-->cvataa_annotate
+python cvataa/annotate_tasks.py models=stardist multi=1 @filter iall=TNBC iany=512 eall=HandE 
+python cvataa/annotate_tasks.py models=instanseg multi=1 @filter iall=TNBC iany=512 eall=HandE 
+python cvataa/annotate_tasks.py models=cellpose multi=1 @filter iall=TNBC iany=512 eall=HandE 
+python cvataa/annotate_tasks.py models=cellvit multi=1 @filter iall=TNBC iany=512 eall=HandE 
+
 <a id="tnbc_d10___annotate_tasks_"></a>
 # TNBC-D10       @ annotate_tasks-->cvat_auto
 <a id="stardist___tnbc_d10_"></a>
@@ -240,7 +260,8 @@ python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filt
 
 <a id="multi___tnbc_d10_"></a>
 ## multi       @ TNBC-D10-->cvataa_annotate
-python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=stardist multi=1
+python cvataa/annotate_tasks.py models=stardist multi=1 @filter iall=TNBC,D10 iany=256 eall=HandE 
+
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=instanseg multi=1
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellpose multi=1
 python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit multi=1

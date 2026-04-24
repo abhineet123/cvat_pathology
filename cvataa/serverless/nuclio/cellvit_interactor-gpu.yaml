@@ -1,0 +1,84 @@
+metadata:
+  name: pth-cellvit_interactor-sam
+  namespace: cvat
+  annotations:
+    name: CellVIT-SAM (interactive)
+    version: 2
+    type: interactor
+    spec:
+    min_pos_points: 0
+    min_neg_points: 0
+    # startswith_box: true
+    startswith_box_optional: true
+
+spec:
+  description: Interactive Cell Segmentation with CellVIT-SAM
+  runtime: 'python:3.10'
+  handler: cellvit_gui:handler
+  eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/cellvit
+
+  build:
+    image: cvat.pth.cellvit_interactor-sam:latest-gpu
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+      # set NVIDIA container runtime settings
+        - kind: ENV
+          value: NVIDIA_VISIBLE_DEVICES=all
+        - kind: ENV
+          value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # get docker build output
+        - kind: ENV
+          value: BUILDKIT_PROGRESS=plain
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/cellvit
+      # set cellvit variant
+        - kind: ENV
+          value: CELLVIT_VARIANT=sam
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install unzip curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # clone custom cellvit
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/cellvit_pp
+      # install cellvit
+        - kind: RUN
+          value: cd cellvit_pp && pip3 install -r requirements.txt
+        - kind: RUN
+          value: pip3 install cupy-cuda12x
+        - kind: RUN
+          value: pip3 install --upgrade timm wandb Numba scipy tensorflow scikit-image pandas
+        - kind: RUN
+          value: pip3 install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+        - kind: RUN
+          value: pip3 uninstall -y opencv-python-headless
+        - kind: RUN
+          value: pip3 install --upgrade opencv-python
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/cellvit/cellvit_pp
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      port: 12352
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

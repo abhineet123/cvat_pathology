@@ -78,22 +78,22 @@ class EnsembleCLI(CellSegCLIBase):
 
     def load_annotations_multi(self):
 
-        projects_dict = [project.__dict__ for project in self.client.projects.list()]
-        project_id_to_dict = {
-            project["_model"]["id"]: project["_model"] for project in projects_dict
-        }
+        # projects_dict = [project.__dict__ for project in self.client.projects.list()]
+        # project_id_to_dict = {
+        #     project["_model"]["id"]: project["_model"] for project in projects_dict
+        # }
 
         task_name = self.task_name.replace(self.name, "multi")
         task_dict = self.task_name_to_obj[task_name]["_model"]
         task_id = task_dict["id"]
-        project_id = task_dict["project_id"]
-        project_dict = project_id_to_dict[project_id]
+        # project_id = task_dict["project_id"]
+        # project_dict = project_id_to_dict[project_id]
 
         task = self.client.tasks.retrieve(task_id)
         labels = task.get_labels()
         label_id_to_name = {label["id"]: label["name"] for label in labels}
 
-        print(f"\nget_cvat_annotations: {task_name}")
+        print(f"get_cvat_annotations: {task_name}")
         frame_name_to_shapes, frame_name_to_info = get_cvat_annotations(
             self.client,
             task_id,

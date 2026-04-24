@@ -99,7 +99,7 @@ class CellSegCLIBase:
         self.frame_id = 0
         # self.label_id = label_id
         self.label_name = label_name
-        self.pbar = tqdm(total=n_frames)
+        self.pbar = tqdm(total=n_frames, position=0, leave=True)
 
     @property
     def spec(self) -> cvataa.DetectionFunctionSpec:

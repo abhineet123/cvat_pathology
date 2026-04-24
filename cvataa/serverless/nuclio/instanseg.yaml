@@ -1,0 +1,64 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-instanSeg
+  namespace: cvat
+  annotations:
+    name: InstanSeg
+    version: 2
+    type: detector
+    spec: |
+      [
+        { "id": 1, "name": "nucleus", "type": "mask" }
+      ]
+
+spec:
+  description: Cell Segmentation with InstanSeg
+  runtime: 'python:3.10'
+  handler: instanseg_gui:handler
+  eventTimeout: 6000s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/instanseg
+
+  build:
+    image: cvat.pth.instanseg
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+      # disable interactive frontend
+        - kind: ENV
+          value: DEBIAN_FRONTEND=noninteractive
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/instanseg
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install curl git python3.11 python3.11 pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # set up debugging
+        - kind: RUN
+          value: pip3 install debugpy
+      # clone custom instanseg
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/instanseg
+      # install instanseg
+        - kind: RUN
+          value: cd instanseg && pip3 install -e .
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

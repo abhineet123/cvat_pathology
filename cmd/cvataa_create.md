@@ -5,6 +5,8 @@
     - [IHC       @ IHC4BC](#ihc___ihc4bc_)
 - [Cervix       @ create_tasks](#cervix___create_tasks_)
     - [512       @ Cervix](#512___cervix_)
+        - [ensemble       @ 512/Cervix](#ensemble___512_cervix_)
+        - [multi       @ 512/Cervix](#multi___512_cervix_)
     - [1024       @ Cervix](#1024___cervix_)
 - [HNSCC       @ create_tasks](#hnscc___create_tasks_)
     - [512       @ HNSCC](#512___hnsc_c_)
@@ -17,6 +19,7 @@
         - [ensemble       @ 256/TNBC](#ensemble___256_tnbc_)
         - [multi       @ 256/TNBC](#multi___256_tnbc_)
     - [512       @ TNBC](#512___tnbc_)
+        - [multi       @ 512/TNBC](#multi___512_tnbc_)
     - [1024       @ TNBC](#1024___tnbc_)
 - [TNBC-HandE       @ create_tasks](#tnbc_hande___create_tasks_)
     - [256       @ TNBC-HandE](#256___tnbc_hande_)
@@ -38,9 +41,17 @@ python cvataa/create_tasks.py root_dir=/data/IHC4BC project_name=IHC4BC-IHC dire
 
 <a id="cervix___create_tasks_"></a>
 # Cervix       @ create_tasks-->cvataa_create
+
 <a id="512___cervix_"></a>
 ## 512       @ Cervix-->cvataa_create
 python cvataa/create_tasks.py project_name=PDL1-2026-Cervix-512 directory=Cervix-Tiles/512 model_suffixes=instanseg,stardist,cellpose,cellvit
+<a id="ensemble___512_cervix_"></a>
+### ensemble       @ 512/Cervix-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-Cervix-512 directory=Cervix-Tiles/512 model_suffixes=ensemble max_images=1000
+<a id="multi___512_cervix_"></a>
+### multi       @ 512/Cervix-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-Cervix-512 directory=Cervix-Tiles/512 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1
+
 <a id="1024___cervix_"></a>
 ## 1024       @ Cervix-->cvataa_create
 python cvataa/create_tasks.py project_name=PDL1-2026-Cervix-1024 directory=Cervix-Tiles/1024 model_suffixes=instanseg,stardist,cellpose,cellvit
@@ -66,7 +77,6 @@ python cvataa/create_tasks.py project_name=PDL1-2026-NSCLC-512 directory=NSCLC-T
 python cvataa/create_tasks.py project_name=PDL1-2026-UpperGI-512 directory=UpperGI-Tiles model_suffixes=instanseg,stardist,cellpose,cellvit
 
 
-
 <a id="tnbc___create_tasks_"></a>
 # TNBC       @ create_tasks-->cvataa_create
 <a id="256___tnbc_"></a>
@@ -79,7 +89,7 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Til
 
 <a id="ensemble___256_tnbc_"></a>
 ### ensemble       @ 256/TNBC-->cvataa_create
-python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=ensemble
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=ensemble max_images=1000
 
 <a id="multi___256_tnbc_"></a>
 ### multi       @ 256/TNBC-->cvataa_create
@@ -95,6 +105,10 @@ python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Til
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=microsam filter.iall=D10
 
 python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=ensemble filter.iall=D10
+
+<a id="multi___512_tnbc_"></a>
+### multi       @ 512/TNBC-->cvataa_create
+python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1
 
 <a id="1024___tnbc_"></a>
 ## 1024       @ TNBC-->cvataa_create
