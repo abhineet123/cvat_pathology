@@ -86,16 +86,12 @@ spec:
         #   value: python -m pip install nuclio-sdk
         # - kind: RUN
         #   value: python -c 'import nuclio_sdk'
-        # - kind: RUN
-          # value: nazio
         - kind: RUN
           value: git clone https://github.com/abhineet123/microsam_private microsam
         - kind: RUN
           # value: cd microsam && conda env create -f environment.yaml
           value: cd microsam && conda env update -n microsam_conda --file environment.yaml
           # value: cd microsam && conda env update -n base --file environment.yaml
-        # - kind: RUN
-          # value: nazio
         - kind: RUN
           value: cd microsam && python -m pip install -e .
         - kind: RUN

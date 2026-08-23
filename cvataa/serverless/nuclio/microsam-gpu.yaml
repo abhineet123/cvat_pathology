@@ -93,14 +93,12 @@ spec:
           # value: cd microsam && conda env create -f environment.yaml
           value: cd microsam && conda env update -n microsam_conda --file environment.yaml
           # value: cd microsam && conda env update -n base --file environment.yaml
-        # - kind: RUN
-          # value: nazio
         - kind: RUN
           value: cd microsam && python -m pip install -e .
         - kind: RUN
           value: python -c 'from micro_sam.prompt_based_segmentation import segment_from_box'
         - kind: RUN
-          value: python -m pip install paramparse cvat-cli opencv-python
+          value: python -m pip install paramparse cvat-cli opencv-python compress_json
 
   triggers:
     myHttpTrigger:

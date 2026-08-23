@@ -6,7 +6,7 @@ metadata:
   name: pth-cellpose
   namespace: cvat
   annotations:
-    name: CellPose-SAM
+    name: Cellpose-SAM
     version: 2
     type: detector
     spec: |
@@ -15,8 +15,8 @@ metadata:
       ]
 
 spec:
-  description: Cell Segmentation with CellPose-SAM
-  runtime: 'python:3.10'
+  description: Cell Segmentation with Cellpose-SAM
+  runtime: 'python:3.11'
   handler: cellpose_gui:handler
   eventTimeout: 30s
   env:
@@ -25,7 +25,7 @@ spec:
 
   build:
     image: cvat.pth.cellpose:latest-gpu
-    baseImage: ubuntu:22.04
+    baseImage: ubuntu:24.04
 
     directives:
       preCopy:
@@ -34,26 +34,54 @@ spec:
           value: NVIDIA_VISIBLE_DEVICES=all
         - kind: ENV
           value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set cellvit variant
+        - kind: ENV
+          value: CELLPOSE_VARIANT=sam
       # set workdir
         - kind: WORKDIR
           value: /opt/nuclio/cellpose
       # install basic deps
         - kind: RUN
           value: apt-get update && apt-get -y install unzip wget curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # install conda
+        - kind: RUN
+          value: wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+        - kind: RUN
+          value: bash Miniforge3-Linux-x86_64.sh -b
+        - kind: RUN
+          value: .  /root/miniforge3/bin/activate
+        - kind: RUN
+          value:  /root/miniforge3/condabin/conda init
+        - kind: ENV
+          value: PATH=$PATH:/root/miniforge3/condabin
+        - kind: RUN
+          value: which conda
+      # install microsam
+        - kind: RUN
+          value: conda create -n cellpose_sam python=3.11
+        - kind: ENV
+          value: PATH=$PATH:/root/miniforge3/envs/cellpose_sam/bin
+        - kind: RUN
+          value: which python
+        - kind: RUN
+          value: python -V
+        - kind: RUN
+          value: ln -sf /root/miniforge3/envs/cellpose_sam/bin/python /usr/bin/python
+        - kind: RUN
+          value: ln -sf /root/miniforge3/envs/cellpose_sam/bin/python3 /usr/bin/python3
+        - kind: RUN
       # install cellpose
         - kind: RUN
-          value: pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+          value: pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu130
         - kind: RUN
-          value: pip install scikit-image
+          value: python -m pip install scikit-image compress_json
         - kind: RUN
           value: git clone https://github.com/abhineet123/cellpose
         - kind: RUN
           value: cd cellpose && pip install -r requirements.txt
         - kind: RUN
           value: cd cellpose && python -m pip install -e .
-      # set workdir
-        # - kind: WORKDIR
-          # value: /opt/nuclio/cellpose/cellpose
+        - kind: RUN
 
   triggers:
     myHttpTrigger:

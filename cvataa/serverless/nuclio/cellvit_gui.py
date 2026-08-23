@@ -1,9 +1,6 @@
 import json
 import os
 import sys
-import base64
-from PIL import Image
-import io
 
 import numpy as np
 import os
@@ -15,16 +12,6 @@ import torch
 from torchvision import transforms as T
 import torch.nn.functional as F
 
-from cellvit.models.cell_segmentation.cellvit import CellViT
-from cellvit.models.cell_segmentation.cellvit_256 import CellViT256
-from cellvit.models.cell_segmentation.cellvit_sam import CellViTSAM
-from cellvit.models.cell_segmentation.cellvit_virchow import CellViTVirchow
-from cellvit.models.cell_segmentation.cellvit_uni import CellViTUNI
-
-from cellvit.inference.postprocessing_cupy import (
-    DetectionCellPostProcessorCupy as DetectionCellPostProcessor,
-)
-from cellvit.utils.tools import unflatten_dict
 
 from cell_seg_gui import CellSegGUI
 
@@ -98,11 +85,16 @@ class CellVITGUI(CellSegGUI):
         model_checkpoint = torch.load(self.ckpt, map_location="cpu")
 
         self.model_type = model_checkpoint["arch"]
+
+        from cellvit.utils.tools import unflatten_dict
+
         self.run_conf = unflatten_dict(model_checkpoint["config"], ".")
 
         context.logger.info(f"creating model: {self.model_type}")
 
         if self.model_type in ["CellViT"]:
+            from cellvit.models.cell_segmentation.cellvit import CellViT
+
             self.model = CellViT(
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -114,6 +106,8 @@ class CellVITGUI(CellSegGUI):
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
         elif self.model_type in ["CellViT256"]:
+            from cellvit.models.cell_segmentation.cellvit_256 import CellViT256
+
             self.model = CellViT256(
                 model256_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -121,6 +115,8 @@ class CellVITGUI(CellSegGUI):
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
         elif self.model_type in ["CellViTVirchow"]:
+            from cellvit.models.cell_segmentation.cellvit_virchow import CellViTVirchow
+
             self.model = CellViTVirchow(
                 model_virchow_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -128,6 +124,8 @@ class CellVITGUI(CellSegGUI):
             )
 
         elif self.model_type in ["CellViTSAM"]:
+            from cellvit.models.cell_segmentation.cellvit_sam import CellViTSAM
+
             self.model = CellViTSAM(
                 model_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -136,6 +134,8 @@ class CellVITGUI(CellSegGUI):
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
         elif self.model_type in ["CellViTUNI"]:
+            from cellvit.models.cell_segmentation.cellvit_uni import CellViTUNI
+
             self.model = CellViTUNI(
                 model_uni_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
@@ -147,6 +147,11 @@ class CellVITGUI(CellSegGUI):
         self.model.load_state_dict(model_checkpoint["model_state_dict"])
         self.model.eval()
         self.model.to(self.device)
+
+        from cellvit.inference.postprocessing_cupy import (
+            DetectionCellPostProcessorCupy as DetectionCellPostProcessor,
+        )
+
         self.postprocessor = DetectionCellPostProcessor(
             wsi=None,
             nr_types=self.run_conf["data"]["num_nuclei_classes"],
@@ -208,6 +213,9 @@ class CellVITGUI(CellSegGUI):
         return predictions
 
     def get_instance_mask(self, image, threshold):
+
+        if threshold <= 0:
+            threshold = 0.5
 
         self.context.logger.info(f"threshold: {threshold}")
 

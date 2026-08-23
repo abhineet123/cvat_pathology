@@ -6,7 +6,7 @@ metadata:
   name: pth-cellpose_interactor
   namespace: cvat
   annotations:
-    name: CellPose-SAM (interactive)
+    name: Cellpose-SAM (interactive)
     version: 2
     type: interactor
     spec:
@@ -17,7 +17,7 @@ metadata:
 
 
 spec:
-  description: Interactive Cell Segmentation with CellPose-SAM
+  description: Interactive Cell Segmentation with Cellpose-SAM
   runtime: 'python:3.10'
   handler: cellpose_gui:handler
   eventTimeout: 30s
@@ -46,7 +46,7 @@ spec:
         - kind: RUN
           value: pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121
         - kind: RUN
-          value: pip install scikit-image
+          value: pip install scikit-image compress_json
         - kind: RUN
           value: git clone https://github.com/abhineet123/cellpose
         - kind: RUN

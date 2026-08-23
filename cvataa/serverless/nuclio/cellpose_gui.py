@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import torch
+import os
 
 from cellpose import models as cellpose_models
 
@@ -12,7 +13,7 @@ from cell_seg_gui import CellSegGUI
 
 def init_context(context):
     context.logger.info("Init context...  0%")
-    model = CellPoseGUI()
+    model = CellPoseGUI(context)
     context.user_data.model = model
     context.logger.info(f"Init context on {model.device}...100%")
 
@@ -34,12 +35,27 @@ def handler(context, event):
 
 
 class CellPoseGUI(CellSegGUI):
-    def __init__(self):
+    def __init__(self, context):
 
         CellSegGUI.__init__(self)
 
+        self.context = context
+
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        pretrained_model = "cpsam"
+
+        try:
+            model_type = os.environ["CELLPOSE_VARIANT"]
+        except KeyError:
+            model_type = "sam"
+
+        model_type_to_pt = dict(
+            sam="cpsam",
+            sam2="cpsam_v2",
+            dino="cpdino-vitb",
+            dino2="cpdino",
+        )
+        pretrained_model = model_type_to_pt[model_type]
+        self.context.logger.info(f"pretrained_model: {pretrained_model}")
         # pixel_size = 0.2632
         # cell_size = 200
         # self.diameter = cell_size / pixel_size
@@ -51,7 +67,7 @@ class CellPoseGUI(CellSegGUI):
     def get_instance_mask(self, image: np.ndarray, threshold: float):
         flow_threshold = 0
         tile_norm_blocksize = 0
-        cellprob_threshold = -10 * threshold if threshold > 0 else -0.1
+        cellprob_threshold = -10 * threshold if threshold > 0 else -1
 
         self.context.logger.info(f"cellprob_threshold: {cellprob_threshold}")
 

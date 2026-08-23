@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 metadata:
-  name: pth-instanSeg
+  name: pth-instanseg
   namespace: cvat
   annotations:
     name: InstanSeg

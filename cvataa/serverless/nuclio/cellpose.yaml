@@ -6,7 +6,7 @@ metadata:
   name: pth-cellpose
   namespace: cvat
   annotations:
-    name: CellPose-SAM
+    name: Cellpose-SAM
     version: 2
     type: detector
     spec: |
@@ -15,7 +15,7 @@ metadata:
       ]
 
 spec:
-  description: Cell Segmentation with CellPose-SAM
+  description: Cell Segmentation with Cellpose-SAM
   runtime: 'python:3.10'
   handler: cellpose_gui:handler
   eventTimeout: 6000s

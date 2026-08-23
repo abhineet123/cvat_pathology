@@ -94,8 +94,6 @@ spec:
           # value: cd microsam && conda env create -f environment.yaml
           value: cd microsam && conda env update -n microsam_conda --file environment.yaml
           # value: cd microsam && conda env update -n base --file environment.yaml
-        # - kind: RUN
-          # value: nazio
         - kind: RUN
           value: cd microsam && python -m pip install -e .
         - kind: RUN
