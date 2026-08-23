@@ -1,0 +1,108 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-cellpose-dino
+  namespace: cvat
+  annotations:
+    name: Cellpose-Dinov3-ViT-B
+    version: 2
+    type: detector
+    spec: |
+      [
+        { "id": 1, "name": "nucleus", "type": "mask" }
+      ]
+
+spec:
+  description: Cell Segmentation with Cellpose-Dinov3-ViT-B
+  runtime: 'python:3.11'
+  handler: cellpose_gui:handler
+  eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/cellpose
+
+  build:
+    image: cvat.pth.cellpose-dino:latest-gpu
+    baseImage: ubuntu:24.04
+
+    directives:
+      preCopy:
+      # set NVIDIA container runtime settings
+        - kind: ENV
+          value: NVIDIA_VISIBLE_DEVICES=all
+        - kind: ENV
+          value: NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # set cellvit variant
+        - kind: ENV
+          value: CELLPOSE_VARIANT=dino
+      # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/cellpose
+      # install basic deps
+        - kind: RUN
+          value: apt-get update && apt-get -y install unzip wget curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+      # install conda
+        - kind: RUN
+          value: wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+        - kind: RUN
+          value: bash Miniforge3-Linux-x86_64.sh -b
+        - kind: RUN
+          value: .  /root/miniforge3/bin/activate
+        - kind: RUN
+          value:  /root/miniforge3/condabin/conda init
+        - kind: ENV
+          value: PATH=$PATH:/root/miniforge3/condabin
+        - kind: RUN
+          value: which conda
+      # install microsam
+        - kind: RUN
+          value: conda create -n cellpose_dino python=3.11
+        - kind: ENV
+          value: PATH=$PATH:/root/miniforge3/envs/cellpose_dino/bin
+        - kind: RUN
+          value: which python
+        - kind: RUN
+          value: python -V
+        - kind: RUN
+          value: ln -sf /root/miniforge3/envs/cellpose_dino/bin/python /usr/bin/python
+        - kind: RUN
+          value: ln -sf /root/miniforge3/envs/cellpose_dino/bin/python3 /usr/bin/python3
+        - kind: RUN
+      # install cellpose
+        - kind: RUN
+          value: pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+        - kind: RUN
+          value: python -m pip install scikit-image compress_json
+        - kind: RUN
+          value: git clone https://github.com/abhineet123/cellpose
+        - kind: RUN
+          value: cd cellpose && pip install -r requirements.txt
+        - kind: RUN
+          value: cd cellpose && python -m pip install -e .
+        - kind: RUN
+          value: python -m pip install git+https://github.com/facebookresearch/dinov3
+      # set workdir
+        # - kind: WORKDIR
+          # value: /opt/nuclio/cellpose/cellpose
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 1
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 1000
+      port: 12348
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume
