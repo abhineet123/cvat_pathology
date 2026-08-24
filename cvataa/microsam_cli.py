@@ -19,7 +19,13 @@ import sys
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 
-from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase, draw_box, linux_path
+from cell_seg_cli import CellSegCLIBase
+
+from cell_seg_utils import (
+    draw_box,
+    linux_path,
+    get_cvat_annotations,
+)
 
 microsam_path = linux_path(os.path.expanduser("~"), "microsam")
 sys.path.append(microsam_path)
@@ -31,18 +37,14 @@ import micro_sam.util as util
 class MicroSAMCLI(CellSegCLIBase):
     def __init__(
         self,
-        task_name,
-        label_name,
-        n_frames,
-        frame_name_to_shapes,
         model_type="vit_h_histopathology",
-        verbose=True,
         **kwargs,
     ) -> None:
-        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "MicroSAM")
+        CellSegCLIBase.__init__(self, name=f"microsam-{model_type}", **kwargs)
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        self.frame_name_to_shapes = frame_name_to_shapes
+
+        self.frame_name_to_shapes, _ = get_cvat_annotations(self.client, self.task_id)
 
         """
         vit_l_lm: Model for cells and nuclei in light microscopy data with ViT Large image encoder. (idealistic-rat on BioImage.IO)
@@ -52,6 +54,9 @@ class MicroSAMCLI(CellSegCLIBase):
         vit_h_histopathology: Model for nuclei in histopathology with ViT Huge image encoder.
         vit_l_histopathology: Model for nuclei in histopathology with ViT Large image encoder.
         vit_b_histopathology: Model for nuclei in histopathology with ViT Base image encoder.
+
+        vit_b_mi: medico sam with ViT Base image encoder
+
 
         """
         self.model_type = model_type
@@ -120,8 +125,10 @@ class MicroSAMCLI(CellSegCLIBase):
 
                     instance_mask[img_mask] = frame_shape_id + 1
                     print()
-            results = instance_mask_to_cells(instance_mask, return_raw)
 
+            results = self.instance_mask_to_cells(
+                instance_mask,
+            )
         self.update_status(context, results)
 
         return results

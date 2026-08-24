@@ -13,20 +13,22 @@ import torch
 from torchvision import transforms as T
 import torch.nn.functional as F
 
-
 import sys
 
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 
-from cell_seg_utils import linux_path, instance_mask_to_cells, CellSegCLIBase
+from cell_seg_cli import CellSegCLIBase
+from cell_seg_utils import linux_path
 
 
 class CellvitCLI(CellSegCLIBase):
     def __init__(
-        self, task_name, label_name, n_frames, model_type="sam", verbose=True, **kwargs
+        self,
+        model_type="sam",
+        **kwargs,
     ) -> None:
-        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "CellVIT")
+        CellSegCLIBase.__init__(self, name=f"cellvit-{model_type}", **kwargs)
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -108,10 +110,10 @@ class CellvitCLI(CellSegCLIBase):
                 vit_structure=self.run_conf["model"]["backbone"],
                 regression_loss=self.run_conf["model"].get("regression_loss", False),
             )
-        elif self.pretrained_model == "CellViTUNI":
+        elif self.model_type in ["CellViTUNI"]:
             from cellvit.models.cell_segmentation.cellvit_uni import CellViTUNI
 
-            model = CellViTUNI(
+            self.model = CellViTUNI(
                 model_uni_path=None,
                 num_nuclei_classes=self.run_conf["data"]["num_nuclei_classes"],
                 num_tissue_classes=self.run_conf["data"]["num_tissue_classes"],
@@ -204,7 +206,9 @@ class CellvitCLI(CellSegCLIBase):
         # nuclei_type_map = torch.squeeze(predictions["nuclei_type_map"]).cpu().numpy()
         # nuclei_type_mask = np.argmax(nuclei_type_map, axis=2)
 
-        results = instance_mask_to_cells(instance_predictions_np, return_raw)
+        results = self.instance_mask_to_cells(
+            instance_predictions_np,
+        )
         self.update_status(context, results)
         return results
 

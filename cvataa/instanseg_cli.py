@@ -11,13 +11,13 @@ from cvat_sdk import make_client
 import cvat_sdk.models as models
 import cvat_sdk.auto_annotation as cvataa
 
-from cell_seg_utils import instance_mask_to_cells, CellSegCLIBase
+from cell_seg_cli import CellSegCLIBase
 
 
 class InstansegCLI(CellSegCLIBase):
-    def __init__(self, task_name, label_name, n_frames, verbose=True, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        CellSegCLIBase.__init__(self, task_name, label_name, n_frames, verbose, "InstanSeg")
+        CellSegCLIBase.__init__(self, name="instanseg", **kwargs)
         self.predictor = InstanSeg("brightfield_nuclei", verbosity=0, device=self.device)
 
     def detect(
@@ -29,8 +29,8 @@ class InstansegCLI(CellSegCLIBase):
         )
 
         labeled_output_np = labeled_output.cpu().detach().numpy().squeeze().astype(np.int64)
-        results = instance_mask_to_cells(labeled_output_np, return_raw)
-
+        results = self.instance_mask_to_cells(
+            labeled_output_np,
+        )
         self.update_status(context, results)
-
         return results
