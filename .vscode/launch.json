@@ -25,15 +25,45 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/create_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/create_tasks.py project_name=PDL1-2026-TNBC-256 directory=TNBC-Tiles/256 model_suffixes=instanseg,stardist,cellpose,cellvit multi=1"
+			"args": "python cvataa/create_tasks.py root_dir=/data/BreastCancerWSIs project_name=OCTOBER_2024-ER-256 directory=OCTOBER_2024_TILES_256/ER model_suffixes=instanseg,stardist,cellpose,cellvit multi=1 chunk.size=1000"
+		},
+		{
+			"name": "serverless debug microsam",
+			"type": "debugpy",
+			"request": "attach",
+			"connect": {
+				"host": "localhost",
+				"port": 5679
+			},
+			"pathMappings": [
+				{
+					"localRoot": "${workspaceFolder}/cvataa/serverless/microsam/nuclio",
+					"remoteRoot": "/opt/nuclio"
+				}
+			]
+		},
+		{
+			"name": "serverless debug instanseg",
+			"type": "debugpy",
+			"request": "attach",
+			"connect": {
+				"host": "localhost",
+				"port": 5678
+			},
+			"pathMappings": [
+				{
+					"localRoot": "${workspaceFolder}/cvataa/serverless/instanseg/nuclio",
+					"remoteRoot": "/opt/nuclio"
+				}
+			]
 		},
 		{
 			"name": "stitch tiles",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/stitch_tiles.py",
+			"program": "${workspaceFolder}/cvataa/stitch_tiles_v2.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/stitch_tiles.py tile_dir=/home/abhineet/data/PDL1-2026-Tiles/TNBC-Tiles/1024/D10 vis=32 is_mask=0 memmap=1",
+			"args": "python cvataa/stitch_tiles_v2.py tile_dir=/data/PDL1-2026-Tiles/vis/PDL1-2026-TNBC-512-cellvit-D10-260322_171011/masks-cellvit wsi_path=/data/PDL1-2026/TNBC-D/D10.svs vis=32 save=0",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -43,9 +73,22 @@
 			"name": "create tiles",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/create_tiles.py",
+			"program": "${workspaceFolder}/cvataa/create_mask_tiles.py",
 			"console": "integratedTerminal",
-			"args": "",
+			"args": "python create_mask_tiles.py root_dir=/data/PDL1-2026-Tiles/vis/PDL1-2026-TNBC-512-cellvit-D10-260322_171011 mask_path=masks-cellvit-stitched/D10.tif output_dir=masks-cellvit-unstitched-256 source_dir=/data/PDL1-2026-Tiles/TNBC-Tiles/256/D10 vis=1",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
+			"name": "create_tissue_mask",
+			"python": "/home/abhineet/.virtualenvs/cellvit/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/create_tissue_mask.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/create_tissue_mask.py wsi_dir=TNBC-D tiles_dir=TNBC-Tiles/256 downsample=1 vis=2 tiles=0",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -64,13 +107,51 @@
 			}
 		},
 		{
-			"name": "annotate tasks cellvit",
-			"python": "/home/abhineet/.virtualenvs/cellvit/bin/python",
+			"name": "annotate tasks stardist",
+			"python": "/home/abhineet/.virtualenvs/stardist/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.iany=256 filter.eall=HandE models=cellvit multi=1",
+			"args": "python cvataa/annotate_tasks.py filter.iall=TNBC,D10 filter.eall=HandE filter.iany=1024 models=stardist",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
+			"name": "annotate tasks instanseg",
+			"python": "/home/abhineet/.virtualenvs/instanseg/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_tasks.py models=instanseg multi=1 @filter iall=OCTOBER_2024-ER iany=256",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
+			"name": "annotate tasks cellpose",
+			"python": "/home/abhineet/.virtualenvs/cellpose/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_tasks.py models=cellpose multi=1 @filter iall=OCTOBER_2024-ER iany=256",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
+		},
+		{
+			"name": "annotate tasks cellvit",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_tasks.py models=cellvit multi=1 @filter iall=OCTOBER_2024-ER iany=256",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -91,12 +172,11 @@
 		},
 		{
 			"name": "annotate tasks ensemble",
-			"python": "/home/abhineet/.virtualenvs/microsam_pip/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=TNBC,D10 iany=256 eall=HandE @ensemble sfx=1 multi=1",
+			"args": "python cvataa/annotate_tasks.py models=stardist,instanseg,cellpose,cellvit @filter iall=OCTOBER_2024-Ki67 iany=256 @ensemble sfx=1 multi=1 dups=1 load=0 @@meta cvat=2 fo=2 shape=0 @ start_id=0",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -104,6 +184,7 @@
 		},
 		{
 			"name": "visualize tasks local",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/visualize_tasks.py",
@@ -116,633 +197,173 @@
 		},
 		{
 			"name": "visualize tasks",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/visualize_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/visualize_tasks.py project_name=PDL1-2026-TNBC-512 directory=TNBC-Tiles/512 model_suffixes=stardist,instanseg,cellpose,cellvit filter.iall=D10"
+			"args": "python cvataa/visualize_tasks.py config_db=cellpose @filter iall=cellpose,grouped"
 		},
 		{
 			"name": "visualize tasks grouped",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/visualize_tasks.py",
 			"console": "integratedTerminal",
-			"args": "cfg=x99 project_name=PDL1-2026-HNSCC directory=HNSCC-Tiles model_suffixes=stardist,instanseg grouped=1 port=5153"
+			"args": "python cvataa/visualize_tasks_batch.py root_dir=/data/BreastCancerWSIs project_name=OCTOBER_2024-Ki67-256 directory=OCTOBER_2024_TILES_256/Ki67 model_suffixes=multi,ensemble multi_labels=instanseg,stardist,cellpose,cellvit start_dir_id=0 chunk_id=0 save_metadata=1 remove_existing=1 level=0 grouped=1 end_task_id=0 end_dir_id=0"
 		},
 		{
-			"name": "cellpose_test",
+			"name": "visualize tasks batch",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/cellpose_test.py",
+			"program": "${workspaceFolder}/cvataa/visualize_tasks_batch.py",
 			"console": "integratedTerminal",
-			"args": ""
+			"args": "python cvataa/visualize_tasks_batch.py root_dir=/data/BreastCancerWSIs project_name=OCTOBER_2024-Ki67-256 directory=OCTOBER_2024_TILES_256/Ki67 model_suffixes=multi,ensemble multi_labels=cellpose start_dir_id=0 chunk_id=0 save_metadata=1 remove_existing=1 level=0 grouped=1 end_task_id=-1 end_dir_id=0 load_from_cache=1 max_samples=1000 cols=0000ff,ff00ff"
 		},
 		{
-			"name": "cellpose_run",
+			"name": "annotate wsi cvit",
+			"python": "/home/abhineet/.virtualenvs/cellvit/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"program": "${workspaceFolder}/cvataa/cellpose_run.py",
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
 			"console": "integratedTerminal",
-			"args": ""
-		},
-		{
-			"name": "microsam serverless debug",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "localhost",
-				"port": 5679
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}/serverless/pytorch/microsam/nuclio",
-					"remoteRoot": "/opt/nuclio"
-				}
-			]
-		},
-		{
-			"name": "instanseg serverless debug",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "localhost",
-				"port": 5678
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}/serverless/pytorch/instanseg/nuclio",
-					"remoteRoot": "/opt/nuclio"
-				}
-			]
-		},
-		{
-			"name": "REST API tests: Attach to server",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9090
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"name": "REST API tests: Attach to RQ annotation worker",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9091
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"name": "REST API tests: Attach to RQ export worker",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9092
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"name": "REST API tests: Attach to RQ import worker",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9093
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"name": "REST API tests: Attach to RQ quality reports worker",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9094
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"name": "REST API tests: Attach to RQ consensus worker",
-			"type": "debugpy",
-			"request": "attach",
-			"connect": {
-				"host": "127.0.0.1",
-				"port": 9096
-			},
-			"pathMappings": [
-				{
-					"localRoot": "${workspaceFolder}",
-					"remoteRoot": "/home/django/"
-				},
-				{
-					"localRoot": "${workspaceFolder}/.env",
-					"remoteRoot": "/opt/venv",
-				}
-			],
-			"justMyCode": false,
-		},
-		{
-			"type": "pwa-chrome",
-			"request": "launch",
-			"preLaunchTask": "npm: start - cvat-ui",
-			"name": "ui.js: debug",
-			"url": "http://localhost:3000",
-			"webRoot": "${workspaceFolder}/cvat-ui",
-			"sourceMaps": true,
-			"sourceMapPathOverrides": {
-				"webpack://cvat/./*": "${workspaceFolder}/cvat-core/*",
-				"webpack:///./*": "${webRoot}/*",
-				"webpack:///src/*": "${webRoot}/*",
-				"webpack:///*": "*",
-				"webpack:///./~/*": "${webRoot}/node_modules/*"
-			},
-			"smartStep": true,
-		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "ui.js: test",
-			"cwd": "${workspaceFolder}/tests",
-			"runtimeExecutable": "${workspaceFolder}/tests/node_modules/.bin/cypress",
-			"args": [
-				"run",
-				"--headless",
-				"--browser",
-				"chrome"
-			],
-			"outputCapture": "std",
-			"console": "internalConsole"
-		},
-		{
-			"name": "server: django",
-			"type": "debugpy",
-			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
+			"args": "python cvataa/annotate_wsi.py models=cvit wsi_dir=NSCLC-B tiles_dir=NSCLC-Tiles/256 filter.eall=HE @cvit batch_size=64 @ start_id=0 @tile sz=256 ovl=64",
 			"env": {
-				"CVAT_SERVERLESS": "1",
-				"ALLOWED_HOSTS": "*",
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282",
-			},
-			"args": [
-				"runserver",
-				"--noreload",
-				"--insecure",
-				"127.0.0.1:7000"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"console": "internalConsole",
-		},
-		{
-			"name": "server: chrome",
-			"type": "pwa-chrome",
-			"request": "launch",
-			"url": "http://localhost:7000/",
-			"disableNetworkCache": true,
-			"trace": true,
-			"showAsyncStacks": true,
-			"pathMapping": {
-				"/static/engine/": "${workspaceFolder}/cvat/apps/engine/static/engine/",
-				"/static/dashboard/": "${workspaceFolder}/cvat/apps/dashboard/static/dashboard/",
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
 			}
 		},
 		{
-			"name": "server: RQ - import",
+			"name": "annotate wsi cvit file_mode",
+			"python": "/home/abhineet/.virtualenvs/cellvit/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"import",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py models=cvit wsi_dir=NSCLC-B tiles_dir=NSCLC-Tiles/256 filter.eall=HE @cvit batch_size=1 @ start_id=0 @tile sz=256 ovl=64 @ file_mode=1",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
 		},
 		{
-			"name": "server: RQ - export",
+			"name": "annotate wsi cvit cls",
+			"python": "/home/abhineet/.virtualenvs/cellvit/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"export",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker",
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py models=cvit wsi_dir=TNBC-D tiles_dir=TNBC-Tiles/256 file_mode=1 @filter iall=D5 eall=HE @cvit batch_size=5 classifier=nucls_super chunk_size=1e1",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
 		},
 		{
-			"name": "server: RQ - quality reports",
+			"name": "annotate wsi clps",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"quality_reports",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker",
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py models=clps wsi_dir=NSCLC-B tiles_dir=NSCLC-Tiles/256 @filter iall=B3 eall=HE @clps batch_size=64 @tile sz=8192 ovl=256 max=2 vis=1",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0"
+			}
 		},
 		{
-			"name": "server: RQ - scheduler",
+			"name": "annotate wsi clps dino",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/rqscheduler.py",
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"args": [
-				"-i",
-				"1"
-			],
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:er:clps-sam2:batch-64:ihc:sz-8192:ov-512 filter.iany+=CHS24-008310_ER_1,CHS24-007458_ER_0,CHS24-007401_ER_0,CHS24-006429_ER_3",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: RQ - annotation",
+			"name": "visualize wsi clps",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"annotation",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker",
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
-		},
-		{
-			"name": "server: RQ - webhooks",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"webhooks",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker",
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
-		},
-		{
-			"name": "server: RQ - cleaning",
-			"type": "debugpy",
-			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"cleaning",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/visualize_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/visualize_wsi.py cfg=bcw:oct:all:qp:clps:cls-rf:fail-bcw_oct_er:chunk-10:uni:cvat suffixes=dino",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: RQ - chunks",
+			"name": "visualize wsi cvit",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"rqworker",
-				"chunks",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/visualize_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/visualize_wsi.py cfg=pdl1:tnbc:he:cvit-sam:grp1:bin:map suffixes=nucls_main,nucls_super,ocelot,pannuke filter.iall=D3_HE",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: RQ - consensus",
+			"name": "visualize eval",
+			"python": "/home/abhineet/.virtualenvs/cvat_vis/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"stopOnEntry": false,
-			"justMyCode": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceRoot}/manage.py",
-			"args": [
-				"rqworker",
-				"consensus",
-				"--worker-class",
-				"cvat.rqworker.SimpleWorker"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
+			"program": "${workspaceFolder}/cvataa/visualize_eval.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/visualize_eval.py search=6a1157 filter.iall=PR,grouped",
 			"env": {
-				"DJANGO_LOG_SERVER_HOST": "localhost",
-				"DJANGO_LOG_SERVER_PORT": "8282"
-			},
-			"console": "internalConsole"
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: migrate",
+			"name": "classify wsi qmlp",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"migrate"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:pr:clps-dino:batch-256:ihc:sz-8192:ov-512:load-2,qmlp:pr,bcw_oct-round_2",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: sync periodic jobs",
+			"name": "sync_wsi",
+			"python": "/home/abhineet/.virtualenvs/cvat_sync/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"syncperiodicjobs"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
+			"program": "${workspaceFolder}/cvataa/sync_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/sync_wsi.py cfg=gbt verbose=1",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
 		{
-			"name": "server: tests",
+			"name": "deploy_wsi clps-dino qmlp",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
 			"type": "debugpy",
 			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"test",
-				"--settings",
-				"cvat.settings.testing",
-				"cvat/apps",
-				"cvat-cli/"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
+			"program": "${workspaceFolder}/cvataa/deploy_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/deploy_wsi.py cfg=deploy:gbt:ki67:clps-dino:batch-256:ihc:sz-8192:ov-512:load-0:max-5 tile_objs=1",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
 		},
-		{
-			"name": "server: REST API tests",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"module": "pytest",
-			"args": [
-				"--verbose",
-				"--no-cov", // vscode debugger might not work otherwise
-				"tests/python/rest_api/"
-			],
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "sdk: tests",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"module": "pytest",
-			"args": [
-				"tests/python/sdk/"
-			],
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "cli: tests",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"module": "pytest",
-			"args": [
-				"tests/python/cli/"
-			],
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "api client: Postprocess generator output",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/cvat-sdk/gen/postprocess.py",
-			"args": [
-				"--schema",
-				"${workspaceFolder}/cvat/schema.yml",
-				"--input-path",
-				"${workspaceFolder}/cvat-sdk/cvat_sdk/"
-			],
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "docs: Postprocess SDK docs",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/site/process_sdk_docs.py",
-			"args": [
-				"--input-dir",
-				"${workspaceFolder}/cvat-sdk/docs/",
-				"--site-root",
-				"${workspaceFolder}/site/",
-			],
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "docs: Build docs",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/site/build_docs.py",
-			"cwd": "${workspaceFolder}",
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "server: Generate REST API Schema",
-			"type": "debugpy",
-			"request": "launch",
-			"justMyCode": false,
-			"stopOnEntry": false,
-			"python": "${command:python.interpreterPath}",
-			"program": "${workspaceFolder}/manage.py",
-			"args": [
-				"spectacular",
-				"--file",
-				"${workspaceFolder}/cvat/schema.yml"
-			],
-			"django": true,
-			"cwd": "${workspaceFolder}",
-			"env": {},
-			"console": "internalConsole"
-		},
-		{
-			"name": "core.js: debug",
-			"type": "node",
-			"request": "launch",
-			"cwd": "${workspaceFolder}/cvat-core",
-			"runtimeExecutable": "node",
-			"runtimeArgs": [
-				"--nolazy",
-				"--inspect-brk=9230",
-				"src/api.js"
-			],
-			"port": 9230
-		}
 	],
-	"compounds": [
-		{
-			"name": "server: debug",
-			"configurations": [
-				"server: django",
-				"server: RQ - import",
-				"server: RQ - export",
-				"server: RQ - annotation",
-				"server: RQ - webhooks",
-				"server: RQ - scheduler",
-				"server: RQ - quality reports",
-				"server: RQ - cleaning",
-				"server: RQ - chunks",
-				"server: RQ - consensus",
-			]
-		}
-	]
 }

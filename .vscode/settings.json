@@ -35,7 +35,6 @@
 		"cvat-cli/build",
 		"cvat-sdk/build",
 	],
-	"python.defaultInterpreterPath": "${workspaceFolder}/.env/",
 	"python.testing.pytestArgs": [
 		"--rootdir",
 		"${workspaceFolder}/tests/"
@@ -47,11 +46,5 @@
 	"cSpell.words": [
 		"crowdsourcing"
 	],
-	"python-envs.pythonProjects": [
-		{
-			"path": ".",
-			"envManager": "ms-python.python:venv",
-			"packageManager": "ms-python.python:pip"
-		}
-	]
+	"python-envs.defaultEnvManager": "ms-python.python:venv"
 }
