@@ -15,10 +15,13 @@
     - [admin_user       @ cvat/install](#admin_user___cvat_install_)
       - [access_tokens       @ admin_user/cvat/install](#access_tokens___admin_user_cvat_instal_l_)
     - [nuctl       @ cvat/install](#nuctl___cvat_install_)
-- [deploy       @ serverless/cvat/install](#deploy___serverless_cvat_instal_l_)
+- [deploy](#deplo_y_)
   - [x99       @ deploy](#x99___deploy_)
   - [gbt       @ deploy](#gbt___deploy_)
+    - [build       @ gbt/deploy](#build___gbt_deploy_)
   - [down       @ deploy](#down___deploy_)
+    - [gbt       @ down/deploy](#gbt___down_deplo_y_)
+    - [x99       @ down/deploy](#x99___down_deplo_y_)
     - [nuclio_wrapper       @ down/deploy](#nuclio_wrapper___down_deplo_y_)
 - [debug](#debug_)
   - [x99       @ debug](#x99___debu_g_)
@@ -30,9 +33,11 @@
       - [issues       @ https/gbt/debug](#issues___https_gbt_debu_g_)
 - [data](#dat_a_)
 - [move](#mov_e_)
+  - [cache       @ move](#cache___move_)
   - [docker       @ move](#docker___move_)
   - [containerd       @ move](#containerd___move_)
 - [prune       @ docker/free_space](#prune___docker_free_spac_e_)
+- [ncdu](#ncd_u_)
 
 <!-- /MarkdownTOC -->
 
@@ -105,7 +110,16 @@ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dear
 
 sudo apt-get update
 
+`cuda-12`
 export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.2-1
+sudo apt-get install -y \
+      nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      
+`cuda-13`
+export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.19.1-1
 sudo apt-get install -y \
       nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
       nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
@@ -142,13 +156,13 @@ docker compose ps --services --status=running
 
 <a id="logs___cvat_install_"></a>
 ### logs       @ cvat/install-->cvat_setup
-sudo docker logs cvat_ui -f
-sudo docker logs cvat_server -f
-sudo docker logs nuclio -f
+docker logs cvat_ui -f
+docker logs cvat_server -f
+docker logs nuclio -f
 
 sudo docker inspect --format '{{ index .Config.Labels "traefik.http.routers.cvat.rule"}}' cvat_server
 
-curl -Lv 104.205.236.116:8080
+curl -Lv 198.166.248.195:8080
 
 <a id="admin_user___cvat_install_"></a>
 ### admin_user       @ cvat/install-->cvat_setup
@@ -167,19 +181,42 @@ wget https://github.com/nuclio/nuclio/releases/download/1.15.9/nuctl-1.15.9-linu
 sudo chmod +x nuctl-1.15.9-linux-amd64
 sudo ln -sf $(pwd)/nuctl-1.15.9-linux-amd64 /usr/local/bin/nuctl
 
-<a id="deploy___serverless_cvat_instal_l_"></a>
-# deploy       @ serverless/cvat/install-->cvat_setup
+<a id="deplo_y_"></a>
+# deploy 
 <a id="x99___deploy_"></a>
 ## x99       @ deploy-->cvat_setup
-CVAT_HOST=104.205.236.116 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
+CVAT_HOST=198.166.248.195 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
 
 <a id="gbt___deploy_"></a>
 ## gbt       @ deploy-->cvat_setup
 CVAT_HOST=cvat.gilbertbigras.com docker compose -f docker-compose.yml -f docker-compose.gbt.yml -f components/serverless/docker-compose.serverless.yml up -d
+<a id="build___gbt_deploy_"></a>
+### build       @ gbt/deploy-->cvat_setup
+docker exec -it cvat_db pg_dumpall > cvat.db.dump
+
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.gbt.yml -f components/serverless/docker-compose.serverless.yml build
+CVAT_VERSION=dev docker compose pull
+
+docker volume rm cvat_cvat_db
+docker compose up -d cvat_db
+docker exec -i cvat_db psql -q -d postgres < cvat.db.dump
+
+`unable to communicate with detector / interactor from gui`
+`cvat Failed to establish a new connection: [Errno 111] Connection refused"))`
+redeploy all modules
+
+`Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "./backend_entrypoint.sh": permission denied`
+caused by not running CVAT_VERSION=dev docker compose pull
 
 <a id="down___deploy_"></a>
 ## down       @ deploy-->cvat_setup
 docker compose down
+<a id="gbt___down_deplo_y_"></a>
+### gbt       @ down/deploy-->cvat_setup
+docker compose -f docker-compose.yml -f docker-compose.gbt.yml -f components/serverless/docker-compose.serverless.yml down
+<a id="x99___down_deplo_y_"></a>
+### x99       @ down/deploy-->cvat_setup
+docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml down
 
 `Network cvat_cvat Resource is still in use ` 
 docker network inspect cvat_cvat
@@ -190,9 +227,15 @@ docker network disconnect -f cvat_cvat nuclio-nuclio-openvino-omz-public-mask-rc
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-shiyinzhang-iog
 
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanSeg
+
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanseg
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-instanseg_interactor
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-stardist
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-stardist_interactor
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellpose
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellpose_interactor
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-sam
+docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit_interactor-sam
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-hipt
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-cellvit-virchow
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam
@@ -202,6 +245,8 @@ docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_lm_large
 docker network disconnect -f cvat_cvat nuclio-nuclio-pth-microsam_mi_base
 
 docker network disconnect -f cvat_cvat nuclio
+
+docker compose down
 
 docker logs cvat_db -f
 docker logs cvat_server -f
@@ -216,16 +261,16 @@ ps -p 2268310 -o pid,vsz=MEMORY -o user,group=GROUP -o comm,args=ARGS
 <a id="x99___debu_g_"></a>
 ## x99       @ debug-->cvat_setup
 http://localhost:8080/
-http://104.205.236.116:8080/
+http://198.166.248.195:8080/
 
-export CVAT_HOST=104.205.236.116
+export CVAT_HOST=198.166.248.195
 
 export CVAT_HOST=localhost:8080
 export CVAT_HOST=localhost:8070
 
-CVAT_HOST=104.205.236.116 docker compose up -d
+CVAT_HOST=198.166.248.195 docker compose up -d
 
-CVAT_HOST=104.205.236.116 sudo -E docker compose up -d
+CVAT_HOST=198.166.248.195 sudo -E docker compose up -d
 <a id="gbt___debu_g_"></a>
 ## gbt       @ debug-->cvat_setup
 <a id="volumes___gbt_debu_g_"></a>
@@ -325,6 +370,14 @@ raw images for a project
 
 <a id="mov_e_"></a>
 # move
+<a id="cache___move_"></a>
+## cache       @ move-->cvat_setup
+https://docs.cvat.ai/docs/api_sdk/sdk/pytorch-adapter/#caching
+
+mkdir /home/NVME-8TB/.cache
+mkdir /home/NVME-8TB/.cache/cvat_sdk
+ln -s /home/NVME-8TB/.cache/cvat_sdk ~/.cache/cvat_sdk
+
 <a id="docker___move_"></a>
 ## docker       @ move-->cvat_setup
 https://stackoverflow.com/questions/59345566/move-docker-volume-to-different-partition
@@ -450,6 +503,19 @@ sudo ctr --namespace moby snapshots cleanup
 
 `garbage collector should do it by itself`
 https://github.com/containerd/containerd/issues/6294
+
+<a id="ncd_u_"></a>
+# ncdu
+sudo ncdu /home --exclude /home/NVME-8TB  --exclude /home/HDD1-8TB --exclude /home/HDD2-8TB
+
+ln -s /home/NVME-8TB/cvat_sdk_cache /home/gilbert/.cache/cvat-sdk
+readlink -f /home/gilbert/.cache/cvat-sdk
+
+ ln -s /home/NVME-8TB/cvataa_cache /home/gilbert/cvat_pathology/.cache
+readlink -f /home/gilbert/cvat_pathology/.cache
+
+
+
 
 
 
