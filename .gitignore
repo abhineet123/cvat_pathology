@@ -1,4 +1,6 @@
+~*
 # Project Specific
+log/
 /data/
 /events/
 /share/
@@ -8,9 +10,13 @@
 /logs
 /profiles
 
+.fiftyone/
+.fiftyone_a6k/
 .cache/
 .gitp/
 .gitb/
+
+.gitconfig
 
 */pretrained/
 cvataa/pretrained/
@@ -20,6 +26,7 @@ cvataa/cellvit/pretrained/
 
 *.cache*
 *.cache/
+*.fiftyone/
 
 # Ignore temporary files
 docker-compose.override.yml
