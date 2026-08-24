@@ -1,18 +1,45 @@
 import numpy as np
 import base64
+import cv2
 import io
 from skimage.measure import approximate_polygon, find_contours
 from PIL import Image
 
 
-def to_contour(mask):
-    # mask.shape
+def to_contour_cv_old(mask_img_gs):
+    contour_pts, _ = cv2.findContours(mask_img_gs, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2:]
+    contour_pts = contour_pts[0]
+    contour_pts = contour_pts.squeeze().tolist()
+    contour_pts_flat = [x for xs in contour_pts for x in xs]
+    return contour_pts_flat
+
+
+def to_contour_cv(mask_img_gs):
+
+    contour_raw = cv2.findContours(mask_img_gs, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    contours_sorted = sorted(list(contour_raw[0]), key=lambda x: x.size, reverse=True)
+    contour = np.squeeze(contours_sorted[0].astype("int32"))
+
+    # contour_cv = to_contour_cv(cell_mask_uint8)
+    # contour_ski = to_contour(cell_mask_uint8)
+
+    if contour.size < 6:
+        """a valid polygon must be at least a triangle"""
+        return None
+
+    contour = contour.squeeze().tolist()
+    contour_flat = [x for xs in contour for x in xs]
+    return contour_flat
+
+
+def to_contour_sk(mask):
     contours = find_contours(mask)
     contour = contours[0]
     contour = np.flip(contour, axis=1)
     contour = approximate_polygon(contour, tolerance=2.5)
-
-    return contour
+    contour_flat = contour.ravel().tolist()
+    return contour_flat
 
 
 def point_is_in_box(pt: list, box: list):
@@ -33,6 +60,7 @@ def to_cvat_mask(box: list, mask):
 class CellSegGUI:
     def __init__(self):
         self.image = None
+        self.threshold = None
         self.mask = None
 
         self.roi = None
@@ -51,9 +79,9 @@ class CellSegGUI:
         roi_mask = mask[y1:y2, x1:x2]
 
         cell_ids, counts = np.unique(roi_mask, return_counts=True)
-        zero_idx = np.argwhere(cell_ids == 0)
-        cell_ids = np.delete(cell_ids, zero_idx)
-        counts = np.delete(counts, zero_idx)
+        invalid_idx = np.argwhere(cell_ids <= 0)
+        cell_ids = np.delete(cell_ids, invalid_idx)
+        counts = np.delete(counts, invalid_idx)
 
         sort_idx = np.argsort(counts)
         cell_ids = cell_ids[sort_idx]
@@ -99,7 +127,7 @@ class CellSegGUI:
         neg_points = data.get("neg_points", None)
         image_bytes = data["image"]
 
-        repeat_image = self.image == image_bytes
+        repeat_image = self.image == image_bytes and self.threshold == threshold
 
         context.logger.info(f"\nrepeat_image: {repeat_image}")
         context.logger.info(f"pos_points: {pos_points}")
@@ -111,6 +139,7 @@ class CellSegGUI:
         if not repeat_image:
             # first call on this image without roi - process entire image
             self.image = image_bytes
+            self.threshold = threshold
 
             image = Image.open(io.BytesIO(base64.b64decode(image_bytes)))
             image_np = np.array(image)
@@ -123,13 +152,8 @@ class CellSegGUI:
         if roi:
             x1, y1 = [int(k) for k in roi[0]]
             x2, y2 = [int(k) for k in roi[1]]
-            roi_size = min(y2 - y1, x2 - x1)
-        else:
-            roi_size = 0
 
-        repeat_call = repeat_image and (
-            not roi or (self.roi == roi and pos_points is not None) or (roi_size < 10)
-        )
+        repeat_call = repeat_image and self.roi is not None and (not roi or self.roi == roi)
 
         context.logger.info(f"repeat_call: {repeat_call}")
 
@@ -139,9 +163,7 @@ class CellSegGUI:
             self.roi_masks = None
             self.roi_bboxes = None
 
-            mask = self.get_instance_mask(image_np, threshold)
-
-            self.mask = mask
+            self.mask = mask = self.get_instance_mask(image_np, threshold)
 
         if repeat_call:
             context.logger.info(f"reusing previous roi with {len(self.roi_masks)} masks left")
@@ -185,10 +207,19 @@ class CellSegGUI:
 
         if bbox:
             context.logger.info(f"returning cell with bbox: {bbox}")
+            # contour_cv = to_contour_cv(out_mask)
+            # context.logger.info(f"pts in contour_cv: {len(contour_cv)}")
+            # contour = to_contour(out_mask).ravel().tolist()
+            # context.logger.info(f"pts in contour: {len(contour)}")
+
         else:
             context.logger.info(f"returning empty mask")
+            # contour_cv = []
 
-        results = {"mask": out_mask.tolist()}
+        results = {
+            "mask": out_mask.tolist(),
+            # "points": contour_cv,
+        }
         return results
 
     def infer(self, event, context, threshold):
@@ -197,25 +228,24 @@ class CellSegGUI:
         self.event = event
 
         image_bytes = event.body["image"]
-        repeat_image = self.image == image_bytes
+        repeat_image = self.image == image_bytes and self.threshold == threshold
 
         if repeat_image:
             mask = self.mask
         else:
             self.image = image_bytes
+            self.threshold = threshold
 
             image = Image.open(io.BytesIO(base64.b64decode(image_bytes)))
             image_np = np.array(image)
 
-            mask = self.get_instance_mask(image_np, threshold)
+            self.mask = mask = self.get_instance_mask(image_np, threshold)
 
         results = []
 
         cell_ids = np.unique(mask)
-        cell_ids.sort()
-        if cell_ids[0] == 0:
-            cell_ids = np.delete(cell_ids, 0)
-
+        invalid_idx = np.argwhere(cell_ids <= 0)
+        cell_ids = np.delete(cell_ids, invalid_idx)
         n_cells = len(cell_ids)
 
         for i, cell_id in enumerate(cell_ids):
@@ -224,17 +254,21 @@ class CellSegGUI:
             xmin, ymin, xmax, ymax = np.amin(xs), np.amin(ys), np.amax(xs), np.amax(ys)
             bbox = [int(xmin), int(ymin), int(xmax), int(ymax)]
 
-            context.logger.info(f"{i + 1} / {n_cells}: {bbox}")
-
             cell_mask_uint8 = cell_mask.astype(np.uint8) * 255
             cvat_mask = to_cvat_mask(bbox, cell_mask_uint8)
-            contour = to_contour(cell_mask_uint8)
+            contour = to_contour_cv(cell_mask_uint8)
+            # contour = to_contour_sk(cell_mask_uint8)
+
+            if contour is None:
+                continue
+
+            context.logger.info(f"{i + 1} / {n_cells}: {bbox} contour: {len(contour)}")
 
             result = {
                 "confidence": str(1),
                 "label": "nucleus",
                 "type": "mask",
-                "points": contour.ravel().tolist(),
+                "points": contour,
                 "mask": cvat_mask,
             }
 
