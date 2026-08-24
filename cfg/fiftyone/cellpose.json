@@ -1,0 +1,11 @@
+{
+    "color_scheme": {
+        "opacity": 0.25,
+        "fields": [
+            {
+                "path": "cellpose",
+                "fieldColor": "#009900"
+            }
+        ]
+    }
+}
