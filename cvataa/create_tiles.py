@@ -1,6 +1,7 @@
 import os
 import re
 import argparse
+import csv
 
 import numpy as np
 from PIL import Image
@@ -9,6 +10,7 @@ import paramparse
 
 from cell_seg_utils import linux_path, draw_box
 
+Image.MAX_IMAGE_PIXELS = None
 
 FILENAME_RE = re.compile(
     r"^(?P<prefix>.+?)\s*\[x=(?P<x>-?\d+),y=(?P<y>-?\d+),w=(?P<w>\d+),h=(?P<h>\d+)\]\.(?P<ext>png|jpg|jpeg|tif|tiff)$",
@@ -18,9 +20,13 @@ FILENAME_RE = re.compile(
 
 class Params(paramparse.CFG):
     """
-    Create mask tiles from a stitched WSI mask using a reference tile directory.
+    Crop mask tiles from a stitched WSI mask using CSV metadata.
+
     :ivar mask_path: Path to the stitched WSI mask image.
     :type mask_path: str
+
+    :ivar metadata_csv: Path to the tile metadata CSV. Defaults to {mask_name}_tile_metadata.csv in the same folder as the mask
+    :type metadata_csv: str
 
     :ivar output_dir: Directory to save output mask tiles.
     :type output_dir: str
@@ -31,11 +37,11 @@ class Params(paramparse.CFG):
     :ivar pad_mode: How to handle crops that go outside the stitched mask bounds.
     :type pad_mode: str
 
-    :ivar reference_dir: Directory containing the original reference tiles whose filenames define crop regions.
-    :type reference_dir: str
-
-    :ivar tile_size: Optional expected tile size for validation.
+    :ivar tile_size: Output tile size in pixels (e.g. 256, 512, 1024)
     :type tile_size: int
+
+    :ivar stride: Stride between tiles in pixels. Defaults to --tile_size (no overlap).
+    :type stride: int
 
     """
 
@@ -44,11 +50,58 @@ class Params(paramparse.CFG):
 
         self.root_dir = ""
         self.mask_path = None
+        self.metadata_csv = None
         self.output_dir = None
         self.output_ext = "png"
         self.pad_mode = "black"
-        self.reference_dir = None
         self.tile_size = None
+        self.stride = None
+
+
+def resolve_metadata_path(mask_path, metadata_csv):
+    """
+    If metadata_csv is not provided, look for {mask_stem}_tile_metadata.csv
+    in the same directory as the mask.
+    """
+    if metadata_csv:
+        return metadata_csv
+
+    mask_dir = os.path.dirname(os.path.abspath(mask_path))
+    mask_stem = os.path.splitext(os.path.basename(mask_path))[0]
+    candidate = os.path.join(mask_dir, f"{mask_stem}_tile_metadata.csv")
+
+    if not os.path.isfile(candidate):
+        raise FileNotFoundError(
+            f"Could not find metadata CSV at: {candidate}\n"
+            f"Please provide --metadata_csv explicitly."
+        )
+
+    print(f"Using metadata CSV: {candidate}")
+    return candidate
+
+
+def load_metadata(csv_path):
+    rows = []
+    with open(csv_path, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(
+                {
+                    "fname": row["fname"],
+                    "path": row["path"],
+                    "x": int(row["x"]),
+                    "y": int(row["y"]),
+                    "w_meta": int(row["w_meta"]),
+                    "h_meta": int(row["h_meta"]),
+                    "actual_w": int(row["actual_w"]),
+                    "actual_h": int(row["actual_h"]),
+                    "canvas_w": int(row["canvas_w"]),
+                    "canvas_h": int(row["canvas_h"]),
+                    "min_x": int(row["min_x"]),
+                    "min_y": int(row["min_y"]),
+                }
+            )
+    return rows
 
 
 def read_image(path):
@@ -56,107 +109,100 @@ def read_image(path):
         return np.array(img)
 
 
-def get_black_fill(arr):
-    if arr.ndim == 2:
-        return 0
-    return np.zeros(arr.shape[2], dtype=arr.dtype)
-
-
-def crop_with_padding(arr, x, y, w, h, pad_mode="black"):
+def crop_tile(arr, x, y, w, h):
+    """Crop a tile from arr at (x, y) with size (w, h). Returns None if out of bounds."""
     H, W = arr.shape[:2]
-
-    x1 = max(0, x)
-    y1 = max(0, y)
-    x2 = min(W, x + w)
-    y2 = min(H, y + h)
-
-    if x1 >= x2 or y1 >= y2:
-        if pad_mode == "skip":
-            return None
-        if arr.ndim == 2:
-            out = np.zeros((h, w), dtype=arr.dtype)
-        else:
-            out = np.zeros((h, w, arr.shape[2]), dtype=arr.dtype)
-        return out
-
-    crop = arr[y1:y2, x1:x2]
-
-    if crop.shape[0] == h and crop.shape[1] == w:
-        return crop
-
-    if pad_mode == "skip":
+    if x < 0 or y < 0 or x + w > W or y + h > H:
         return None
+    return arr[y : y + h, x : x + w]
 
-    fill = get_black_fill(arr)
-    if arr.ndim == 2:
-        out = np.full((h, w), fill, dtype=arr.dtype)
-    else:
-        out = np.full((h, w, arr.shape[2]), fill, dtype=arr.dtype)
 
-    out_y1 = y1 - y
-    out_x1 = x1 - x
-    out[out_y1 : out_y1 + crop.shape[0], out_x1 : out_x1 + crop.shape[1]] = crop
-    return out
+def is_blank(tile):
+    """Returns True if the tile contains no non-zero pixels."""
+    return not np.any(tile)
+
+
+def generate_tile_positions(canvas_w, canvas_h, min_x, min_y, tile_size, stride):
+    """
+    Generate all (x, y) top-left positions for tiles of `tile_size` across the canvas,
+    using `stride` step. Positions are in original WSI coordinates.
+    """
+    positions = []
+    y = min_y
+    while y + tile_size <= min_y + canvas_h:
+        x = min_x
+        while x + tile_size <= min_x + canvas_w:
+            positions.append((x, y))
+            x += stride
+        y += stride
+    return positions
 
 
 def main():
     params: Params = paramparse.process(Params)
 
-    assert params.mask_path is not None, "mask_path must be provided"
-    assert params.reference_dir is not None, "reference_dir must be provided"
-
     if params.root_dir:
         params.mask_path = linux_path(params.root_dir, params.mask_path)
+        params.output_dir = linux_path(params.root_dir, params.output_dir)
 
+    stride = params.stride if params.stride is not None else params.tile_size
     os.makedirs(params.output_dir, exist_ok=True)
 
+    metadata_csv = resolve_metadata_path(params.mask_path, params.metadata_csv)
+    metadata = load_metadata(metadata_csv)
+
+    if not metadata:
+        raise ValueError(f"No rows found in metadata CSV: {metadata_csv}")
+
+    # All rows share the same canvas/origin info — read from first row
+    first = metadata[0]
+    canvas_w = first["canvas_w"]
+    canvas_h = first["canvas_h"]
+    min_x = first["min_x"]
+    min_y = first["min_y"]
+
+    # Derive prefix from first fname
+    m = FILENAME_RE.match(first["fname"])
+    prefix = m.group("prefix").strip() if m else "tile"
+
+    print(f"Loading mask: {params.mask_path}")
     mask = read_image(params.mask_path)
-    H, W = mask.shape[:2]
-
-    print(f"Loaded mask: {params.mask_path}")
     print(f"Mask shape: {mask.shape}")
-    print(f"Reference dir: {params.reference_dir}")
-    print(f"Output dir: {params.output_dir}")
+    print(f"Canvas size from metadata: {canvas_w} x {canvas_h}")
+    print(f"Canvas origin: ({min_x}, {min_y})")
+    print(f"Tile size: {params.tile_size}  Stride: {stride}")
 
-    ref_files = sorted(os.listdir(params.reference_dir))
+    mask_h, mask_w = mask.shape[:2]
+    if mask_h != canvas_h or mask_w != canvas_w:
+        print(
+            f"Warning: mask shape ({mask_w}x{mask_h}) does not match "
+            f"canvas size ({canvas_w}x{canvas_h}). Cropping may be inaccurate."
+        )
+
+    positions = generate_tile_positions(canvas_w, canvas_h, min_x, min_y, params.tile_size, stride)
+    print(f"Total tile positions to crop: {len(positions)}")
+    print("Blank (all-black) tiles will be skipped — positions are recoverable from the CSV.")
 
     processed = 0
-    skipped = 0
+    skipped_blank = 0
+    skipped_bounds = 0
     failed = 0
 
-    for fname in ref_files:
-        ref_path = os.path.join(params.reference_dir, fname)
-        if not os.path.isfile(ref_path):
-            continue
+    for wx, wy in positions:
+        # Convert WSI coordinates to mask-local coordinates
+        lx = wx - min_x
+        ly = wy - min_y
 
-        m = FILENAME_RE.match(fname)
-        if not m:
-            print(f"Skipping filename with unexpected format: {fname}")
-            skipped += 1
-            continue
-
-        prefix = m.group("prefix")
-        x = int(m.group("x"))
-        y = int(m.group("y"))
-        w = int(m.group("w"))
-        h = int(m.group("h"))
-
-        if params.tile_size is not None:
-            if w != params.tile_size or h != params.tile_size:
-                print(
-                    f"Skipping {fname}: filename tile size ({w}x{h}) "
-                    f"does not match expected --tile_size {params.tile_size}"
-                )
-                skipped += 1
-                continue
-
-        tile = crop_with_padding(mask, x, y, w, h, pad_mode=params.pad_mode)
+        tile = crop_tile(mask, lx, ly, params.tile_size, params.tile_size)
         if tile is None:
-            print(f"Skipping {fname}: crop outside bounds and pad_mode=skip")
-            skipped += 1
+            skipped_bounds += 1
             continue
 
-        out_name = f"{prefix} [x={x},y={y},w={w},h={h}].{params.output_ext}"
+        if is_blank(tile):
+            skipped_blank += 1
+            continue
+
+        out_name = f"{prefix} [x={wx},y={wy},w={params.tile_size},h={params.tile_size}].{params.output_ext}"
         out_path = os.path.join(params.output_dir, out_name)
 
         try:
@@ -167,9 +213,10 @@ def main():
             failed += 1
 
     print("\nDone.")
-    print(f"Processed: {processed}")
-    print(f"Skipped:   {skipped}")
-    print(f"Failed:    {failed}")
+    print(f"Processed:      {processed}")
+    print(f"Skipped blank:  {skipped_blank}")
+    print(f"Skipped bounds: {skipped_bounds}")
+    print(f"Failed:         {failed}")
 
 
 if __name__ == "__main__":
