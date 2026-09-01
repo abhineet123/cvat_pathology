@@ -48,6 +48,13 @@
             - [subtype-p       @ sam2/clps-ki67/bcw-oct](#subtype_p___sam2_clps_ki67_bcw_oct_)
     - [cellvit       @ bcw-oct](#cellvit___bcw_oc_t_)
         - [file_mode       @ cellvit/bcw-oct](#file_mode___cellvit_bcw_oc_t_)
+- [bcw-all       @ annotate_tasks](#bcw_all___annotate_tasks_)
+    - [clps-er       @ bcw-all](#clps_er___bcw_al_l_)
+        - [dino       @ clps-er/bcw-all](#dino___clps_er_bcw_al_l_)
+    - [clps-pr       @ bcw-all](#clps_pr___bcw_al_l_)
+        - [dino       @ clps-pr/bcw-all](#dino___clps_pr_bcw_al_l_)
+    - [clps-ki67       @ bcw-all](#clps_ki67___bcw_al_l_)
+        - [dino       @ clps-ki67/bcw-all](#dino___clps_ki67_bcw_al_l_)
 
 <!-- /MarkdownTOC -->
 
@@ -362,9 +369,54 @@ python cvataa/annotate_wsi.py models=cvit wsi_dir=OCTOBER_2024 tiles_dir=OCTOBER
 `nucls_main`
 python cvataa/annotate_wsi.py models=cvit wsi_dir=OCTOBER_2024 tiles_dir=OCTOBER_2024_TILES_256 filter.eall=HE @cvit batch_size=1 classifier=nucls_main @ file_mode=1 end_id=0 start_id=0 
 
+<a id="bcw_all___annotate_tasks_"></a>
+# bcw-all       @ annotate_tasks-->cvat_auto
+<a id="clps_er___bcw_al_l_"></a>
+## clps-er       @ bcw-all-->cvataa_wsi
+<a id="dino___clps_er_bcw_al_l_"></a>
+### dino       @ clps-er/bcw-all-->cvataa_wsi
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:sept:er:clps-dino:batch-256:ihc:sz-8192:ov-512:out_ssd
+```
+QuPath script "/home/gilbert/cvat_pathology/cvataa/qupath/export_annotations_headless.groovy" --args "/data/BreastCancerWSIs/SEPTEMBER2024-QP" --args "/data/BreastCancerWSIs/SEPTEMBER-2024/September 12 2024/CHS24-006079/CHS24-006079_ER_0.svs" --args "/data/BreastCancerWSIs/SEPTEMBER-2024/September 12 2024/CHS24-006079/annotations/CHS24-006079_ER_0.geojson.gz"
+```
 
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:first:er:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:june:er:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:july:er:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:nov:er:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:dec:er:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
 
+47+13+10+88+20+50
 
+<a id="clps_pr___bcw_al_l_"></a>
+## clps-pr       @ bcw-all-->cvataa_wsi
+<a id="dino___clps_pr_bcw_al_l_"></a>
+### dino       @ clps-pr/bcw-all-->cvataa_wsi
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:sept:pr:clps-dino:batch-256:ihc:sz-8192:ov-512:out_ssd
+
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:first:pr:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:june:pr:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:july:pr:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:nov:pr:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:dec:pr:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+
+46+11+13+87+20+50
+
+<a id="clps_ki67___bcw_al_l_"></a>
+## clps-ki67       @ bcw-all-->cvataa_wsi
+<a id="dino___clps_ki67_bcw_al_l_"></a>
+### dino       @ clps-ki67/bcw-all-->cvataa_wsi
+CUDA_VISIBLE_DEVICES=1 python cvataa/annotate_wsi.py cfg=bcw:sept:ki67:clps-dino:batch-256:ihc:sz-8192:ov-512:out_ssd
+```
+conda env config vars set PATH=$PATH:/opt/qupath/bin
+```
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:first:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:june:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:july:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:nov:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+CUDA_VISIBLE_DEVICES=0 python cvataa/annotate_wsi.py cfg=bcw:dec:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:out_ssd
+
+47+16+12+88+20+50
 
 
 

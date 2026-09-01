@@ -28,6 +28,7 @@
     - [conda       @ cellpose](#conda___cellpose_)
     - [a6k       @ cellpose](#a6k___cellpose_)
         - [swap       @ a6k/cellpose](#swap___a6k_cellpose_)
+        - [swap-2       @ a6k/cellpose](#swap_2___a6k_cellpose_)
 - [cellvit       @ install](#cellvit___instal_l_)
     - [venv       @ cellvit](#venv___cellvi_t_)
         - [intellisense       @ venv/cellvit](#intellisense___venv_cellvit_)
@@ -454,6 +455,18 @@ sudo nano /etc/fstab
 /home/gilbert/swapfile.img swap swap sw 0 0
 
 sudo swapon /home/gilbert/swapfile.img
+
+<a id="swap_2___a6k_cellpose_"></a>
+### swap-2       @ a6k/cellpose-->cvataa_setup
+dd if=/dev/zero of=/home/gilbert/swapfile2.img bs=1024 count=64M
+sudo chmod 600 /home/gilbert/swapfile2.img
+sudo chown 0:0 /home/gilbert/swapfile2.img
+sudo mkswap /home/gilbert/swapfile2.img
+
+sudo nano /etc/fstab
+/home/gilbert/swapfile2.img swap swap sw 0 0
+
+sudo swapon /home/gilbert/swapfile2.img
 
 <a id="cellvit___instal_l_"></a>
 # cellvit       @ install-->cvataa_setup
