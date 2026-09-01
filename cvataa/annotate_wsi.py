@@ -67,23 +67,31 @@ class Params(paramparse.CFG):
         self.cls = ""
         self.skip_seg = 0
 
-        self.wsi_root_dir = "/data/PDL1-2026"
+        self.wsi_root_dir = ""
         self.wsi_dir = ""
         self.wsi_exts = [
             ".svs",
         ]
+        self.mask_dir = "masks"
         self.mask_ext = ".tiff"
-        self.ann_ext = ".geojson"
 
-        self.tiles_root_dir = "/data/PDL1-2026-Tiles"
+        self.ann_dir = "annotations"
+        self.ann_ext = ".geojson.gz"
+
+        self.tiles_root_dir = ""
         self.tiles_dirs = []
 
-        self.output_dir_root = "/data/PDL1-2026-Detections"
-        self.output_dir = ""
+        self.output_root_dir = ""
         self.compression = "zlib"
 
         self.seg_output_path = ""
         self.cls_output_path = ""
+
+        self.qp_export = 0
+        self.qp_proj_path = ""
+        self.qp_exe = "QuPath"
+        self.qp_dir = "qupath"
+        self.qp_export_script = "export_annotations_headless.groovy"
 
         self.file_mode = 0
         self.tissue_filter = 1
@@ -484,6 +492,73 @@ def classify_wsi(
     return features
 
 
+def annotations_geojson_to_mask(
+    ann_path,
+    mask_path,
+    mask_h,
+    mask_w,
+):
+
+    features = utils.load_geojson_as_chunks(ann_path)
+
+    mask = np.zeros((mask_h, mask_w), dtype=np.uint8)
+    # assert len(features) < len(all_rgb_cols), "too many cells for 8 bit RGB image"
+
+    n_features = len(features)
+    for feat_id, feat in tqdm(
+        enumerate(features), desc="writing annotations to mask", total=n_features
+    ):
+        feat_properties = feat["properties"]
+        if feat_properties["objectType"] != "annotation":
+            continue
+
+        geom = shapely.geometry.shape(feat["geometry"])
+        if geom.geom_type == "MultiPolygon":
+            for geom_ in geom.geoms:
+                utils.draw_geom_to_mask(geom_, mask, col_id=255)
+        else:
+            utils.draw_geom_to_mask(geom, mask, col_id=255)
+
+    print(f"saving mask to {mask_path}")
+    tifffile.imwrite(
+        mask_path,
+        mask,
+        bigtiff=True,
+        compression="zlib",
+        photometric=None,
+        metadata=None,
+    )
+
+
+def export_qp_annotations(params: Params, wsi_path, output_path):
+    assert params.qp_exe, "qp_exe must be provided"
+    assert params.qp_dir, "qp_dir must be provided"
+    assert params.qp_export_script, "qp_export_script must be provided"
+    assert params.qp_proj_path, "qp_proj_path must be provided"
+
+    script_dir_path = str(Path(__file__).resolve().parent)
+    groovy_script_path = utils.linux_path(script_dir_path, params.qp_dir, params.qp_export_script)
+    assert os.path.isfile(groovy_script_path), f"invalid groovy script: {groovy_script_path}"
+    qp_cmds = [
+        params.qp_exe,
+        "script",
+        groovy_script_path,
+        "--args",
+        params.qp_proj_path,
+        "--args",
+        wsi_path,
+        "--args",
+        output_path,
+    ]
+
+    qp_cmd = utils.to_str(qp_cmds, sep=" ")
+    print(f"running qupath export cmd:\n{qp_cmd}")
+    try:
+        subprocess.run(qp_cmds, capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError:
+        return False
+
+
 def main():
     params = Params()
     paramparse.process(params)
@@ -491,30 +566,17 @@ def main():
     # if params.deploy.enable:
     # deploy_model(params)
 
+    assert params.wsi_root_dir, "wsi_root_dir must be provided"
+    assert params.wsi_dir, "wsi_dir must be provided"
+
+    wsi_dir_path = utils.linux_path(params.wsi_root_dir, params.wsi_dir)
+
     wsi_files = utils.get_wsi_files(
-        params.wsi_root_dir,
-        params.wsi_dir,
+        wsi_dir_path,
         params.wsi_exts,
         params.recursive,
         params.filter,
     )
-
-    tissue_mask_files = [
-        utils.linux_path(
-            params.wsi_root_dir, params.wsi_dir, "masks", Path(wsi_file).stem + params.mask_ext
-        )
-        for wsi_file in wsi_files
-    ]
-    tissue_annotation_files = [
-        utils.linux_path(
-            params.wsi_root_dir,
-            params.wsi_dir,
-            "annotations",
-            Path(wsi_file).stem + "_annotations" + params.ann_ext,
-        )
-        for wsi_file in wsi_files
-    ]
-
     tiles_dirs = utils.get_tiles_dirs(
         params.tiles_root_dir, params.tiles_dirs, params.recursive, params.filter
     )
@@ -534,15 +596,7 @@ def main():
 
     print(f"Running on {n_wsi_files} WSI(s):\n{utils.to_str_multi([wsi_files, tiles_dirs])}\n")
 
-    output_dir = params.output_dir
-
-    if not output_dir:
-        output_dir = params.wsi_dir
-
-    if params.output_dir_root:
-        output_dir = utils.linux_path(params.output_dir_root, output_dir)
-
-    os.makedirs(output_dir, exist_ok=True)
+    assert params.output_root_dir, "output_root_dir must be provided"
 
     cls_model = get_cls_model(params.cls, params)
 
@@ -554,25 +608,51 @@ def main():
 
         for wsi_file_id, (
             wsi_file,
-            tissue_mask_file,
-            tissue_annotation_file,
             tiles_dir,
-        ) in enumerate(
-            zip(wsi_files, tissue_mask_files, tissue_annotation_files, tiles_dirs, strict=True)
-        ):
+        ) in enumerate(zip(wsi_files, tiles_dirs, strict=True)):
             wsi_file_name = utils.path_to_name(wsi_file)
 
             assert wsi_file_name, "wsi_file_name cannot be empty"
 
             print(f"\n\nannotating wsi {wsi_file_id+1} / {n_wsi_files}: {wsi_file_name}")
 
+            wsi_parent_dir = utils.path_to_parent(wsi_file)
+
+            tissue_mask_file = utils.linux_path(
+                wsi_parent_dir, params.mask_dir, wsi_file_name + params.mask_ext
+            )
+            tissue_annotation_file = utils.linux_path(
+                wsi_parent_dir, params.ann_dir, wsi_file_name + params.ann_ext
+            )
+
+            output_dir = utils.linux_path(params.output_root_dir, params.wsi_dir)
+            os.makedirs(output_dir, exist_ok=True)
+
             seg_output_path = params.seg_output_path
             if not seg_output_path:
-                seg_output_path = utils.linux_path(output_dir, seg_model.name, f"{wsi_file_name}")
+                seg_output_path = utils.linux_path(output_dir, seg_model.name, "seg")
+                if wsi_parent_dir != wsi_dir_path:
+                    wsi_parent_dir_relative = os.path.relpath(wsi_parent_dir, wsi_dir_path)
+                    seg_output_path = utils.linux_path(seg_output_path, wsi_parent_dir_relative)
 
             seg_cache_path = utils.linux_path(
                 output_dir, ".cache", seg_model.name, "seg", f"{wsi_file_name}"
             )
+
+            if params.qp_export and not os.path.isfile(tissue_annotation_file):
+                if not export_qp_annotations(params, wsi_file, tissue_annotation_file):
+                    raise AssertionError("annotations exporting from QP project failed")
+
+            if not os.path.isfile(tissue_mask_file):
+                wsi = openslide.OpenSlide(wsi_file)
+                wsi_w, wsi_h = wsi.dimensions
+                wsi.close()
+                annotations_geojson_to_mask(
+                    tissue_annotation_file,
+                    tissue_mask_file,
+                    wsi_h,
+                    wsi_w,
+                )
 
             if params.skip_seg:
                 print("skipping segmentation")
