@@ -309,16 +309,15 @@ def init_fo_dataset(params: Params, vis_dataset_name, color_fields):
     return dataset_loaded, dataset
 
 
-def draw_geom_to_mask(geom, panoptic_mask, col_id, class_id):
-    coords = np.array(geom.exterior.coords, dtype=np.int32)
-    cv2.fillPoly(panoptic_mask, [coords], color=(col_id, class_id))
-    for interior in geom.interiors:
-        hole = np.array(interior.coords, dtype=np.int32)
-        cv2.fillPoly(panoptic_mask, [hole], color=0)
-
-
-def geojson_to_mask(
-    ann_dir, model, wsi_file_name, mask_path, mask_h, mask_w, labels, labels_to_ignore
+def detections_geojson_to_mask(
+    ann_dir,
+    model,
+    wsi_file_name,
+    mask_path,
+    mask_h,
+    mask_w,
+    labels,
+    labels_to_ignore,
 ):
 
     ann_dir_path = utils.linux_path(ann_dir, model, wsi_file_name)
@@ -358,9 +357,9 @@ def geojson_to_mask(
         geom = shapely.geometry.shape(feat["geometry"])
         if geom.geom_type == "MultiPolygon":
             for geom_ in geom.geoms:
-                draw_geom_to_mask(geom_, panoptic_mask, col_id, class_id)
+                utils.draw_geom_to_mask(geom_, panoptic_mask, color=(col_id, class_id))
         else:
-            draw_geom_to_mask(geom, panoptic_mask, col_id, class_id)
+            utils.draw_geom_to_mask(geom, panoptic_mask, color=(col_id, class_id))
 
     panoptic_mask = panoptic_mask.transpose((2, 0, 1))
     print(f"saving mask to {mask_path}")
@@ -818,7 +817,7 @@ def main():
                     )
 
                     if not os.path.exists(wsi_mask_path):
-                        geojson_to_mask(
+                        detections_geojson_to_mask(
                             ann_dir,
                             model,
                             wsi_file_name,
