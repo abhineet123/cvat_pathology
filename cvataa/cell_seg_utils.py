@@ -1537,8 +1537,11 @@ def mask_rgb_to_id(mask_rgb, rgb_cols_to_id):
     return mask_id
 
 
-def sleep_with_pbar(sleep_t):
-    for _ in tqdm(range(sleep_t)):
+def sleep_with_pbar(sleep_t, desc=""):
+    pbar = tqdm(range(sleep_t))
+    if desc:
+        pbar.set_description(desc)
+    for _ in pbar:
         time.sleep(1)
 
 
@@ -1548,6 +1551,342 @@ def to_str_multi(relevant_task_names, item_sep="\t", line_sep="\n"):
 
 def to_str(relevant_task_names, sep="\n"):
     return sep.join(relevant_task_names)
+
+
+class CVConstants:
+    similarity_types = {
+        0: cv2.TM_CCOEFF_NORMED,
+        1: cv2.TM_SQDIFF_NORMED,
+        2: cv2.TM_CCORR_NORMED,
+        3: cv2.TM_CCOEFF,
+        4: cv2.TM_SQDIFF,
+        5: cv2.TM_CCORR,
+    }
+    interp_types = {
+        0: cv2.INTER_NEAREST,
+        1: cv2.INTER_LINEAR,
+        2: cv2.INTER_AREA,
+        3: cv2.INTER_CUBIC,
+        4: cv2.INTER_LANCZOS4,
+    }
+    fonts = {
+        0: cv2.FONT_HERSHEY_SIMPLEX,
+        1: cv2.FONT_HERSHEY_PLAIN,
+        2: cv2.FONT_HERSHEY_DUPLEX,
+        3: cv2.FONT_HERSHEY_COMPLEX,
+        4: cv2.FONT_HERSHEY_TRIPLEX,
+        5: cv2.FONT_HERSHEY_COMPLEX_SMALL,
+        6: cv2.FONT_HERSHEY_SCRIPT_SIMPLEX,
+        7: cv2.FONT_HERSHEY_SCRIPT_COMPLEX,
+    }
+    line_types = {
+        0: cv2.LINE_4,
+        1: cv2.LINE_8,
+        2: cv2.LINE_AA,
+    }
+
+
+class CVText:
+    def __init__(
+        self,
+        color="white",
+        bkg_color="black",
+        location=0,
+        font=5,
+        size=0.8,
+        thickness=1,
+        line_type=2,
+        offset=(5, 25),
+    ):
+        self.color = color
+        self.bkg_color = bkg_color
+        self.location = location
+        self.font = font
+        self.size = size
+        self.thickness = thickness
+        self.line_type = line_type
+        self.offset = offset
+
+        self.help = {
+            "font": "Available fonts: "
+            "0: cv2.FONT_HERSHEY_SIMPLEX, "
+            "1: cv2.FONT_HERSHEY_PLAIN, "
+            "2: cv2.FONT_HERSHEY_DUPLEX, "
+            "3: cv2.FONT_HERSHEY_COMPLEX, "
+            "4: cv2.FONT_HERSHEY_TRIPLEX, "
+            "5: cv2.FONT_HERSHEY_COMPLEX_SMALL, "
+            "6: cv2.FONT_HERSHEY_SCRIPT_SIMPLEX ,"
+            "7: cv2.FONT_HERSHEY_SCRIPT_COMPLEX; ",
+            "location": "0: top left, 1: top right, 2: bottom right, 3: bottom left; ",
+            "bkg_color": "should be empty for no background",
+        }
+
+
+def stack_images_with_resize(
+    img_list,
+    grid_size=None,
+    stack_order=0,
+    borderless=1,
+    preserve_order=0,
+    return_idx=0,
+    # annotations=None,
+    # ann_fmt=(0, 5, 15, 1, 1, 255, 255, 255, 0, 0, 0),
+    only_height=0,
+    only_border=1,
+):
+    n_images = len(img_list)
+    # print('grid_size: {}'.format(grid_size))
+
+    if grid_size is None:
+        n_cols = n_rows = int(np.ceil(np.sqrt(n_images)))
+    else:
+        n_rows, n_cols = grid_size
+
+        if n_rows < 0:
+            n_rows = int(np.ceil(n_images / n_cols))
+        elif n_cols < 0:
+            n_cols = int(np.ceil(n_images / n_rows))
+
+    target_ar = 1920.0 / 1080.0
+    if n_cols <= n_rows:
+        target_ar /= 2.0
+    shape_img_id = 0
+    min_ar_diff = np.inf
+    img_heights = np.zeros((n_images,), dtype=np.int32)
+    for _img_id in range(n_images):
+        height, width = img_list[_img_id].shape[:2]
+        img_heights[_img_id] = height
+        img_ar = float(n_cols * width) / float(n_rows * height)
+        ar_diff = abs(img_ar - target_ar)
+        if ar_diff < min_ar_diff:
+            min_ar_diff = ar_diff
+            shape_img_id = _img_id
+
+    img_heights_sort_idx = np.argsort(-img_heights)
+    row_start_idx = img_heights_sort_idx[:n_rows]
+    img_idx = img_heights_sort_idx[n_rows:]
+    # print('img_heights: {}'.format(img_heights))
+    # print('img_heights_sort_idx: {}'.format(img_heights_sort_idx))
+    # print('img_idx: {}'.format(img_idx))
+
+    # grid_size = [n_rows, n_cols]
+    img_size = img_list[shape_img_id].shape
+    height, width = img_size[:2]
+
+    if only_height:
+        width = 0
+    # grid_size = [n_rows, n_cols]
+    # print 'img_size: ', img_size
+    # print 'n_images: ', n_images
+    # print 'grid_size: ', grid_size
+
+    # print()
+    stacked_img = None
+    list_ended = False
+    img_idx_id = 0
+    inner_axis = 1 - stack_order
+    stack_idx = []
+    stack_locations = []
+    start_row = 0
+    # curr_ann = ''
+    for row_id in range(n_rows):
+        start_id = n_cols * row_id
+        curr_row = None
+        start_col = 0
+        for col_id in range(n_cols):
+            img_id = start_id + col_id
+            if img_id >= n_images:
+                curr_img = np.zeros(img_size, dtype=np.uint8)
+                list_ended = True
+            else:
+                if preserve_order:
+                    _curr_img_id = img_id
+                elif col_id == 0:
+                    _curr_img_id = row_start_idx[row_id]
+                else:
+                    _curr_img_id = img_idx[img_idx_id]
+                    img_idx_id += 1
+
+                curr_img = img_list[_curr_img_id]
+                # if annotations:
+                #     curr_ann = annotations[_curr_img_id]
+                stack_idx.append(_curr_img_id)
+                # print(curr_img.shape[:2])
+
+                # if curr_ann:
+                #     putTextWithBackground(curr_img, curr_ann, fmt=ann_fmt)
+
+                if not borderless:
+                    curr_img = resize_ar(curr_img, width, height, only_border=only_border)
+                if img_id == n_images - 1:
+                    list_ended = True
+            if curr_row is None:
+                curr_row = curr_img
+            else:
+                if borderless:
+                    if curr_row.shape[0] < curr_img.shape[0]:
+                        curr_row = resize_ar(
+                            curr_row, 0, curr_img.shape[0], only_border=only_border
+                        )
+                    elif curr_img.shape[0] < curr_row.shape[0]:
+                        curr_img = resize_ar(
+                            curr_img, 0, curr_row.shape[0], only_border=only_border
+                        )
+                # print('curr_row.shape: ', curr_row.shape)
+                # print('curr_img.shape: ', curr_img.shape)
+                curr_row = np.concatenate((curr_row, curr_img), axis=inner_axis)
+
+            curr_h, curr_w = curr_img.shape[:2]
+            stack_locations.append((start_row, start_col, start_row + curr_h, start_col + curr_w))
+            start_col += curr_w
+
+        if stacked_img is None:
+            stacked_img = curr_row
+        else:
+            if borderless:
+                resize_factor = float(curr_row.shape[1]) / float(stacked_img.shape[1])
+                if curr_row.shape[1] < stacked_img.shape[1]:
+                    curr_row = resize_ar(curr_row, stacked_img.shape[1], 0, only_border=only_border)
+                elif curr_row.shape[1] > stacked_img.shape[1]:
+                    stacked_img = resize_ar(
+                        stacked_img, curr_row.shape[1], 0, only_border=only_border
+                    )
+
+                new_start_col = 0
+                for _i in range(n_cols):
+                    _start_row, _start_col, _end_row, _end_col = stack_locations[_i - n_cols]
+                    _w, _h = _end_col - _start_col, _end_row - _start_row
+                    w_resized, h_resized = _w / resize_factor, _h / resize_factor
+                    stack_locations[_i - n_cols] = (
+                        _start_row,
+                        new_start_col,
+                        _start_row + h_resized,
+                        new_start_col + w_resized,
+                    )
+                    new_start_col += w_resized
+            # print('curr_row.shape: ', curr_row.shape)
+            # print('stacked_img.shape: ', stacked_img.shape)
+            stacked_img = np.concatenate((stacked_img, curr_row), axis=stack_order)
+
+        curr_h, curr_w = curr_row.shape[:2]
+        start_row += curr_h
+
+        if list_ended:
+            break
+    if return_idx:
+        return stacked_img, stack_idx, stack_locations
+    else:
+        return stacked_img
+
+
+def annotate(
+    img_list,
+    text=None,
+    fmt=CVText(),
+    no_resize=1,
+    grid_size=(-1, 1),
+    max_width=0,
+    max_height=0,
+):
+    """
+
+    :param str title:
+    :param np.ndarray | list | tuple img_list:
+    :param str | logging.RootLogger | CustomLogger text:
+    :param int pause:
+    :param CVText fmt:
+    :param int no_resize:
+    :param int n_modules:
+    :param int use_plt:
+    :param tuple(int) grid_size:
+    :return:
+    """
+    if not isinstance(img_list, (list, tuple)):
+        img_list = [
+            img_list,
+        ]
+
+    size = fmt.size
+
+    # print('self.size: {}'.format(self.size))
+
+    color = [255, 255, 255]
+    font = CVConstants.fonts[fmt.font]
+    line_type = CVConstants.line_types[fmt.line_type]
+
+    location = list(fmt.offset)
+
+    if "\n" in text:
+        text_list = text.split("\n")
+    else:
+        text_list = [
+            text,
+        ]
+
+    max_text_width = 0
+    text_height = 0
+    text_heights = []
+
+    for _text in text_list:
+        _text_width, _text_height = cv2.getTextSize(
+            _text, font, fontScale=fmt.size, thickness=fmt.thickness
+        )[0]
+        if _text_width > max_text_width:
+            max_text_width = _text_width
+        text_height += _text_height + 5
+        text_heights.append(_text_height)
+
+    text_width = max_text_width + 10
+    text_height += 30
+
+    text_img = np.zeros((text_height, text_width), dtype=np.uint8)
+    for _id, _text in enumerate(text_list):
+        cv2.putText(text_img, _text, tuple(location), font, size, color, fmt.thickness, line_type)
+        location[1] += text_heights[_id] + 5
+
+    text_img = text_img.astype(np.float32) / 255.0
+
+    text_img = np.stack(
+        [
+            text_img,
+        ]
+        * 3,
+        axis=2,
+    )
+
+    for _id, _img in enumerate(img_list):
+        if len(_img.shape) == 2:
+            _img = np.stack(
+                [
+                    _img,
+                ]
+                * 3,
+                axis=2,
+            )
+        if _img.dtype == np.uint8:
+            _img = _img.astype(np.float32) / 255.0
+        img_list[_id] = _img
+
+    img_stacked = stack_images_with_resize(
+        img_list, grid_size=grid_size, preserve_order=1, only_border=no_resize
+    )
+    img_list_txt = [text_img, img_stacked]
+
+    img_stacked_txt = stack_images_with_resize(
+        img_list_txt, grid_size=(2, 1), preserve_order=1, only_border=no_resize
+    )
+    # img_stacked_txt_res = cv2.resize(img_stacked_txt, (300, 300), fx=0, fy=0)
+    # img_stacked_txt_res_gs = cv2.cvtColor(img_stacked_txt_res, cv2.COLOR_BGR2GRAY)
+
+    img_stacked_txt = (img_stacked_txt * 255).astype(np.uint8)
+
+    if img_stacked_txt.shape[0] > max_height > 0:
+        img_stacked_txt = resize_ar(img_stacked_txt, height=max_height)
+
+    if img_stacked_txt.shape[1] > max_width > 0:
+        img_stacked_txt = resize_ar(img_stacked_txt, width=max_width)
+
+    return img_stacked_txt
 
 
 def resize_ar(
@@ -2127,12 +2466,25 @@ def check_wsi_files_and_slides(wsi_files, tiles_dirs):
     return n_wsi_files, wsi_file_names
 
 
-def get_wsi_files(wsi_root_dir, wsi_dir, wsi_exts, recursive, filter: Filter):
-    assert wsi_root_dir, "wsi_root_dir must be provided"
-    assert wsi_dir, "wsi_dir must be provided"
+def draw_geom_to_mask(geom, mask, color):
+    if isinstance(color, (list, tuple))
+    bkg_color = [0, ]*len(color)
+    coords = np.array(geom.exterior.coords, dtype=np.int32)
+    cv2.fillPoly(mask, [coords], color=color)
+    for interior in geom.interiors:
+        hole = np.array(interior.coords, dtype=np.int32)
+        cv2.fillPoly(mask, [hole], color=0)
 
-    wsi_dir_path = linux_path(wsi_root_dir, wsi_dir)
 
+def draw_geom_to_semantic_mask(geom, sem_mask, col_id):
+    coords = np.array(geom.exterior.coords, dtype=np.int32)
+    cv2.fillPoly(sem_mask, [coords], color=col_id)
+    for interior in geom.interiors:
+        hole = np.array(interior.coords, dtype=np.int32)
+        cv2.fillPoly(sem_mask, [hole], color=0)
+
+
+def get_wsi_files(wsi_dir_path, wsi_exts, recursive, filter: Filter):
     if recursive:
         wsi_file_gen = [
             [
@@ -2172,6 +2524,10 @@ def is_date(filename, date_fmt):
         return False
     # print("is date")
     return True
+
+
+def path_to_parent(path_):
+    return os.path.dirname(path_)
 
 
 def path_to_name(path_, remove_ext=True):
