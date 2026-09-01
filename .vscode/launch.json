@@ -346,7 +346,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/sync_wsi.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/sync_wsi.py cfg=gbt verbose=1",
+			"args": "python cvataa/sync_wsi.py cfg=gbt verbose=0",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0",
