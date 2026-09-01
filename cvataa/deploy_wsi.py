@@ -54,8 +54,8 @@ class Params(BaseParams):
         self.masks_dir = "masks"
         self.out_dir = "detections"
 
-        # self.magee_dir = "magee"
-        self.magee_dir = ""
+        self.magee_dir = "magee"
+        # self.magee_dir = ""
 
         self.qp_exe = "QuPath"
         self.qp_dir = "qupath"
@@ -69,7 +69,8 @@ class Params(BaseParams):
         self.mask_ext = ".tiff"
 
         self.poll_interval = 10
-        self.copy_wait_t = 10
+        self.copy_wait_t = 20
+        self.wsi_wait_t = 0
         self.max_days = 0
         self.verbose = 0
         self.time_fmt = "%y%m%d_%H%M%S"
@@ -392,8 +393,11 @@ def process_wsi(
     else:
         file_dict = dict(run_timestamps=[])
 
-    utils.wait_for_file_to_finalize(wsi_path, params.copy_wait_t, wsi_mod_t, params.verbose)
-    utils.wait_for_file_to_finalize(ann_path, params.copy_wait_t, ann_mod_t, params.verbose)
+    utils.wait_for_file_to_finalize(wsi_path, params.copy_wait_t, params.verbose)
+    utils.wait_for_file_to_finalize(ann_path, params.copy_wait_t, params.verbose)
+
+    if params.wsi_wait_t > 0:
+        utils.sleep_with_pbar(f"waiting before processing {shared_name}")
 
     print("\n")
 
