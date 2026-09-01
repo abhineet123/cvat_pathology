@@ -112,10 +112,10 @@ for (idx, entry in project.getImageList()) {
 
     if (wsi_name.endsWith("HE")){
         image_type =  ImageData.ImageType.valueOf("BRIGHTFIELD_H_E")
-        logger.info("setting ${wsi_name} to HE")
+        logger.info("setting ${wsi_name} image type to H&E")
     } else {
         image_type =  ImageData.ImageType.valueOf("BRIGHTFIELD_H_DAB")
-        logger.info("setting ${wsi_name} to H_DAB")
+        logger.info("setting ${wsi_name} image type to H-DAB")
     }
     imageData.setImageType(image_type)
     entry.saveImageData(imageData)
