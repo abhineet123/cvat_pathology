@@ -139,7 +139,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py models=cellpose multi=1 @filter iall=OCTOBER_2024-ER iany=256",
+			"args": "python cvataa/annotate_tasks.py seg.models=cellpose multi=1 @filter iall=OCTOBER_2024-ER iany=256",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -151,7 +151,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_tasks.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_tasks.py models=cellvit multi=1 @filter iall=OCTOBER_2024-ER iany=256",
+			"args": "python cvataa/annotate_tasks.py seg.models=cellvit multi=1 @filter iall=OCTOBER_2024-ER iany=256",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0"
@@ -281,7 +281,20 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:er:clps-sam2:batch-64:ihc:sz-8192:ov-512 filter.iany+=CHS24-008310_ER_1,CHS24-007458_ER_0,CHS24-007401_ER_0,CHS24-006429_ER_3",
+			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:load2:qp_feat filter.iany+=PLS24-009296 @qp.feat all=0 export=1",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
+		},
+		{
+			"name": "annotate wsi clps dino 2",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:ki67:clps-dino:batch-64:ihc:sz-8192:ov-512:load2:qp_feat filter.iany+=PLS24-009296",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0",
@@ -333,7 +346,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/annotate_wsi.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/annotate_wsi.py cfg=bcw:oct:pr:clps-dino:batch-256:ihc:sz-8192:ov-512:load-2,qmlp:pr,bcw_oct-round_2",
+			"args": "python cvataa/annotate_wsi.py cfg=bcw:first:er:strd-qp:feat:ihc:qp_cls:no_cells,mg:th1:3",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0",
@@ -353,13 +366,26 @@
 			}
 		},
 		{
-			"name": "deploy_wsi clps-dino qmlp",
+			"name": "deploy_wsi",
 			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${workspaceFolder}/cvataa/deploy_wsi.py",
 			"console": "integratedTerminal",
-			"args": "python cvataa/deploy_wsi.py cfg=deploy:gbt:ki67:clps-dino:batch-256:ihc:sz-8192:ov-512:load-0:max-5 tile_objs=1",
+			"args": "python cvataa/deploy_wsi.py cfg=server:rz9:pr:dbg run_cfgs=cellpose:pr,stardist,cellpose_qp_cls",
+			"env": {
+				"PYTHONUNBUFFERED": "1",
+				"DISPLAY": "localhost:10.0",
+			}
+		},
+		{
+			"name": "deploy_wsi cmb",
+			"python": "/home/abhineet/.virtualenvs/cellpose311/bin/python",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/cvataa/deploy_wsi.py",
+			"console": "integratedTerminal",
+			"args": "python cvataa/deploy_wsi.py cfg=server:ws1:cmb2:stardist:cellpose:cellpose_qp_cls",
 			"env": {
 				"PYTHONUNBUFFERED": "1",
 				"DISPLAY": "localhost:10.0",
