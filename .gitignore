@@ -1,4 +1,6 @@
+~*
 # Project Specific
+log/
 /data/
 /events/
 /share/
@@ -8,9 +10,28 @@
 /logs
 /profiles
 
+.fiftyone/
+.fiftyone_a6k/
+.cache/
+.gitp/
+.gitb/
+
+.gitconfig
+
+*/pretrained/
+cvataa/pretrained/
+cvataa/cellvit/pretrained/
+
+*.log
+
+*.cache*
+*.cache/
+*.fiftyone/
+
 # Ignore temporary files
 docker-compose.override.yml
 __pycache__
+*.code-workspace
 *.pyc
 ._*
 .coverage
@@ -32,6 +53,9 @@ yarn-error.log*
 #Ignore Cypress tests temp files
 /tests/cypress/fixtures
 /tests/cypress/screenshots
+/tests/cypress/videos
+/tests/coverage
+/tests/.nyc_output
 .idea/
 
 #Ignore helm-related files
@@ -45,6 +69,7 @@ yarn-error.log*
 /site/node_modules/
 /site/tech-doc-hugo
 /site/.hugo_build.lock
+/site/assets/sdk-examples/
 
 # Ignore all the installed packages
 node_modules

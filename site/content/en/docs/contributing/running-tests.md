@@ -21,7 +21,7 @@ description: 'Instructions on how to run all existence tests.'
    ```shell
    docker exec -i cvat_server \
              /bin/bash -c \
-             "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@localhost.company', '12qwaszx')\" | python3 ~/manage.py shell"
+             "echo \"from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('admin', 'admin@localhost.company', '12qwaszx')\" | python3 ~/manage.py shell"
    ```
 1. Install npm dependencies:
    ```bash
@@ -76,6 +76,11 @@ pytest ./tests/python --stop-services
 If you need to rebuild your CVAT images add `--rebuild` option:
 ```bash
 pytest ./tests/python --rebuild
+```
+
+If you need to persist data volumes across test sessions add `--keep-data` option
+```bash
+pytest ./tests/python --start-services --keep-data
 ```
 
 If you want to get a code coverage report, use special option for it:

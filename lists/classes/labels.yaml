@@ -1,0 +1,49 @@
+pannuke:
+  Neoplastic: #ffff00
+  Inflammatory: #ffff00
+  Connective: #ffff00
+  Dead: #ffff00
+  Epithelial: #ffff00
+
+consep:
+  Other: #ffff00
+  Inflammatory: #ff0000
+  Epithelial: #00ff00
+  Spindle-Shaped: #0000ff
+
+lizard:
+  0: Neutrophil
+  1: Epithelial
+  2: Lymphocyte
+  3: Plasma
+  4: Eosinophil
+  5: Connective tissue
+
+nucls_main:
+  0: Tumor
+  1: Mitotic
+  2: Stromal
+  3: Macrophil
+  4: Lymphocyte
+  5: Plasma
+  6: Other
+
+nucls_super:
+  0: Tumor
+  1: Stroma
+  2: sTILs
+  3: Other
+
+panoptils:
+  0: Other Cells
+  1: Epithelial Cells
+  2: Stromal Cells
+  3: TILs
+
+ocelot:
+  0: Other Cell
+  1: Tumor Cell
+
+midog:
+  0: Mitotic
+  1: Non-Mitotic

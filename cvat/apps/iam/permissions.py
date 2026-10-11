@@ -8,15 +8,14 @@ from __future__ import annotations
 import operator
 from abc import ABCMeta, abstractmethod
 from collections.abc import Sequence
-from enum import Enum
 from functools import cached_property, reduce
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from attrs import define, field
 from django.apps import AppConfig
 from django.conf import settings
-from django.db.models import Model, Q
+from django.db.models import Q, Value
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 
@@ -29,11 +28,6 @@ if TYPE_CHECKING:
     from rest_framework.viewsets import ViewSet
 
     from cvat.apps.engine.types import ExtendedRequest
-
-
-class StrEnum(str, Enum):
-    def __str__(self) -> str:
-        return self.value
 
 
 @define
@@ -93,6 +87,7 @@ def build_iam_context(
     return {
         "user_id": request.user.id,
         "group_name": request.iam_context["privilege"],
+        "org_specified": request.iam_context["organization_specified"],
         "org_id": getattr(organization, "id", None),
         "org_slug": getattr(organization, "slug", None),
         "org_owner_id": organization.owner_id if organization else None,
@@ -111,6 +106,7 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
     url: str
     user_id: int
     group_name: str | None
+    org_specified: bool
     org_id: int | None
     org_owner_id: int | None
     org_role: str | None
@@ -178,36 +174,36 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
         return {
             "input": {
                 "scope": self.scope,
-                **self.get_opa_auth_payload(),
-                **self.get_opa_resource_payload(),
+                "auth": self.get_opa_auth_payload(),
+                "resource": self.get_resource(),
+                "settings": self.get_opa_settings_payload(),
             }
         }
 
     def get_opa_auth_payload(self):
         return {
-            "auth": {
-                "user": {
-                    "id": self.user_id,
-                    "privilege": self.group_name,
-                },
-                "organization": (
-                    {
-                        "id": self.org_id,
-                        "owner": {
-                            "id": self.org_owner_id,
-                        },
-                        "user": {
-                            "role": self.org_role,
-                        },
-                    }
-                    if self.org_id is not None
-                    else None
-                ),
+            "user": {
+                "id": self.user_id,
+                "privilege": self.group_name,
             },
+            "organization": (
+                {
+                    "id": self.org_id,
+                    "owner": {
+                        "id": self.org_owner_id,
+                    },
+                    "user": {
+                        "role": self.org_role,
+                    },
+                }
+                if self.org_id is not None
+                else None
+            ),
+            "organization_specified": self.org_specified,
         }
 
-    def get_opa_resource_payload(self):
-        return {"resource": self.get_resource()}
+    def get_opa_settings_payload(self):
+        return {}
 
     @abstractmethod
     def get_resource(self):
@@ -235,6 +231,17 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
 
         return PermissionResult(allow=allow, reasons=reasons)
 
+    @staticmethod
+    def add_org_filter_proof(queryset):
+        """
+        Records that an organization filter has been applied to the queryset,
+        so that the check in OrganizationFilterBackend can succeed.
+        Normally, this is done automatically when `.filter` is called and the Rego filter rule
+        uses add_organization_filter. However, a view can also call this directly
+        if it implements custom logic for organization filtering.
+        """
+        return queryset.alias(org_filter_proof=Value(True))
+
     def filter(self, queryset):
         url = self.url.replace("/allow", "/filter")
 
@@ -246,7 +253,10 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
             "&": operator.and_,
         }
 
+        add_org_filter_proof = False
+
         def parse_filter(expr):
+            nonlocal add_org_filter_proof
             match expr:
                 case ["~", arg]:
                     return ~parse_filter(arg)
@@ -259,6 +269,9 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
                     return ~Q(pk__in=[])
                 case {}:
                     return Q(**expr)
+                case "org_filter_proof":
+                    add_org_filter_proof = True
+                    return ~Q(pk__in=[])
                 case _:
                     assert False, "unknown expression type"
 
@@ -266,7 +279,12 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
         # query spans multiple tables (e.g. members__user_id, owner_id), it's
         # possible to get duplicate results when a QuerySet is evaluated.
         # That's when you'd use distinct().
-        return queryset.filter(parse_filter(r)).distinct()
+        queryset = queryset.filter(parse_filter(r)).distinct()
+
+        if add_org_filter_proof:
+            queryset = self.add_org_filter_proof(queryset)
+
+        return queryset
 
     @classmethod
     def get_per_field_update_scopes(cls, request, scopes_per_field):
@@ -290,13 +308,6 @@ class OpenPolicyAgentPermission(metaclass=ABCMeta):
         return scopes
 
 
-T = TypeVar("T", bound=Model)
-
-
-def is_public_obj(obj: T) -> bool:
-    return getattr(obj, "is_public", False)
-
-
 class PolicyEnforcer(BasePermission):
     def _check_permission(
         self, request: ExtendedRequest, view: ViewSet, obj
@@ -307,7 +318,7 @@ class PolicyEnforcer(BasePermission):
             # request and replace the http method). To avoid handling
             # ('POST', 'metadata') and ('PUT', 'metadata') in every request,
             # the condition below is enough.
-            if self.is_metadata_request(request, view) or obj and is_public_obj(obj):
+            if self.is_metadata_request(request, view):
                 return True
 
             assert hasattr(
@@ -345,14 +356,6 @@ class PolicyEnforcer(BasePermission):
     def is_metadata_request(request, view):
         return request.method == "OPTIONS" or (
             request.method == "POST" and view.action == "metadata" and len(request.data) == 0
-        )
-
-
-class IsAuthenticatedOrReadPublicResource(BasePermission):
-    def has_object_permission(self, request, view, obj) -> bool:
-        return bool(
-            (request.user and request.user.is_authenticated)
-            or (request.method == "GET" and is_public_obj(obj))
         )
 
 

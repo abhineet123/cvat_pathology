@@ -3,8 +3,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { snakeCase } from 'lodash';
+import { camelCase, snakeCase } from 'lodash';
 import { ArgumentError } from './exceptions';
+import { CamelizedV2 } from './type-utils';
 
 export function isBoolean(value): boolean {
     return typeof value === 'boolean';
@@ -126,16 +127,13 @@ export class FieldUpdateTrigger {
     }
 
     getUpdated(data: object, propMap: Record<string, string> = {}): Record<string, unknown> {
-        const result = {};
+        const source = data as Record<string, unknown>;
+        const result: Record<string, unknown> = {};
         for (const updatedField of Object.keys(this.#updatedFlags)) {
-            result[propMap[updatedField] || updatedField] = data[updatedField];
+            result[propMap[updatedField] || updatedField] = source[updatedField];
         }
         return result;
     }
-}
-
-export function clamp(value: number, min: number, max: number): number {
-    return Math.min(Math.max(value, min), max);
 }
 
 export function camelToSnakeCase(str: string): string {
@@ -158,6 +156,13 @@ export function fieldsToSnakeCase(params: Record<string, any>): Record<string, a
     return result;
 }
 
+export function fieldsToCamelCase<T extends object>(params: T): CamelizedV2<T> {
+    return Object.entries(params).reduce((acc, [key, value]) => {
+        acc[camelCase(key)] = value;
+        return acc;
+    }, {} as Record<string, unknown>) as CamelizedV2<T>;
+}
+
 export function filterFieldsToSnakeCase(
     filter: Record<string, string | number>,
     keysToSnake: string[],
@@ -177,7 +182,7 @@ export function filterFieldsToSnakeCase(
         }
     }
 
-    if (searchParams.filter) {
+    if (typeof searchParams.filter === 'string') {
         const parsed = JSON.parse(searchParams.filter);
         searchParams.filter = JSON.stringify({ and: [parsed, ...filtersGroup] });
     } else if (filtersGroup.length) {

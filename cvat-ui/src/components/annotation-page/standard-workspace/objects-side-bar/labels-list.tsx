@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: MIT
 
 import React, { useEffect } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual } from 'utils/redux';
 import message from 'antd/lib/message';
 
 import { LabelType, ObjectType, ShapeType } from 'cvat-core-wrapper';
@@ -52,7 +53,16 @@ function LabelsListComponent(): JSX.Element {
     );
 
     useEffect(() => {
-        const updatedComponentShortcuts = JSON.parse(JSON.stringify(componentShortcuts));
+        const updatedComponentShortcuts = Object.keys(componentShortcuts).reduce<Record<string, KeyMapItem>>(
+            (shortcuts, key) => ({
+                ...shortcuts,
+                [key]: {
+                    ...componentShortcuts[key],
+                    sequences: keyMap[key]?.sequences ?? componentShortcuts[key].sequences,
+                },
+            }),
+            {},
+        );
         for (const [index, labelID] of Object.entries(keyToLabelMapping)) {
             if (labelID) {
                 const labelName = labels.find((label: any) => label.id === labelID)?.name;

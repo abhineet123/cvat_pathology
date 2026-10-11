@@ -18,6 +18,7 @@ interface MenuItemsData {
     onBackupProject: () => void;
     onDeleteProject: () => void;
     selectedIds: number[];
+    isExportDatasetDisabled: boolean;
 }
 
 export default function ProjectActionsItems(
@@ -33,6 +34,7 @@ export default function ProjectActionsItems(
         onBackupProject,
         onDeleteProject,
         selectedIds = [],
+        isExportDatasetDisabled,
     } = menuItemsData;
 
     const isBulkMode = selectedIds.length > 1;
@@ -46,7 +48,7 @@ export default function ProjectActionsItems(
         key: 'export-dataset',
         onClick: onExportDataset,
         label: withCount('Export dataset', 'export-dataset'),
-        disabled: isDisabled('export-dataset'),
+        disabled: isExportDatasetDisabled || isDisabled('export-dataset'),
     }, 0]);
 
     menuItems.push([{
@@ -112,5 +114,5 @@ export default function ProjectActionsItems(
         }),
     );
 
-    return menuItems.toSorted((menuItem1, menuItem2) => menuItem1[1] - menuItem2[1]).map((menuItem) => menuItem[0]);
+    return [...menuItems].sort((menuItem1, menuItem2) => menuItem1[1] - menuItem2[1]).map((menuItem) => menuItem[0]);
 }
